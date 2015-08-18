@@ -66,44 +66,8 @@ public class PlatformMover : MonoBehaviour {
 
     public void LaunchBall(int direction)
     {
-        //this.BallRigRef.velocity = Vector3.zero;
-        //this.BallRigRef.angularVelocity = Vector3.zero;
         this.BallRigRef.AddForce(transform.forward * this.thrust * direction);
         this.lastDirection = direction;
-    }
-
-    public void LaunchBall(ContactPoint cp)
-    {
-        this.BallRigRef.velocity = Vector3.zero;
-        this.BallRigRef.angularVelocity = Vector3.zero;
-        Vector3 newDir = Vector3.zero;
-        Vector3 curDir = this.BallRigRef.transform.TransformDirection(Vector3.forward);
-        newDir = Vector3.Reflect(curDir, cp.normal);
-        
-        //Debug.Log(curDir);
-        //Debug.Log(newDir);
-        //Debug.Log(cp.point);
-
-        if (cp.point.x < this.gameObject.transform.position.x)
-        {
-            Debug.Log("Left part");
-            Debug.Log(curDir);
-            Debug.Log(newDir);
-            Debug.Log(cp.point);
-        }
-        else if (cp.point.x > this.gameObject.transform.position.x)
-        {
-            Debug.Log("Right Part");
-            Debug.Log(curDir);
-            Debug.Log(newDir);
-            Debug.Log(cp.point);
-        }
-        else
-        {
-            this.BallRigRef.rotation = Quaternion.FromToRotation(Vector3.forward, newDir);
-
-            this.BallRigRef.AddForce(newDir * this.thrust * -1);
-        }
     }
 
     public void LaunchBall(ContactPoint cp, bool platformFlag)
@@ -144,7 +108,7 @@ public class PlatformMover : MonoBehaviour {
     protected void LaunchBallStraight(Vector3 newDir, Vector3 curDir)
     {
         this.BallRigRef.rotation = Quaternion.FromToRotation(Vector3.forward, newDir);
-        Debug.Log(this.BallRigRef.rotation.ToString());
+
         this.BallRigRef.AddForce(newDir * this.thrust);
     }
 
@@ -154,12 +118,10 @@ public class PlatformMover : MonoBehaviour {
         this.BallRigRef.angularVelocity = Vector3.zero;
         Vector3 newDir = Vector3.zero;
         Vector3 curDir = this.BallRigRef.transform.TransformDirection(Vector3.forward);
-        Debug.LogWarning(curDir.ToString());
         
         newDir = Vector3.Reflect(curDir, cp.normal);
-        Debug.LogWarning(newDir.ToString());
+
         this.BallRigRef.rotation = Quaternion.FromToRotation(Vector3.forward, newDir);
-        Debug.LogWarning(this.BallRigRef.rotation.ToString());
         this.BallRigRef.AddForce(newDir * this.thrust);
     }
 
@@ -168,45 +130,6 @@ public class PlatformMover : MonoBehaviour {
         if (c.gameObject.name == this.BallGameObject.name && this.launched)
         {
             this.LaunchBall(c.contacts[0], true);
-            /*this.LaunchBall(this.lastDirection * -1);
-            foreach (ContactPoint cp in c.contacts)
-            {
-                Vector3 referenceForward = cp.normal * -1;
- 
-                // the vector perpendicular to referenceForward (90 degrees clockwise)
-                // (used to determine if angle is positive or negative)
-                Vector3 referenceRight= Vector3.Cross(Vector3.up, referenceForward);
-                Vector3 heading = gameObject.transform.position - this.BallGameObject.transform.position;
-                // the vector of interest
-                Vector3 newDirection = heading;
- 
-                // Get the angle in degrees between 0 and 180
-                float angle = Vector3.Angle(newDirection, referenceForward);
- 
-                // Determine if the degree value should be negative.  Here, a positive value
-                // from the dot product means that our vector is on the right of the reference vector   
-                // whereas a negative value means we're on the left.
-                float sign = Mathf.Sign(Vector3.Dot(newDirection, referenceRight));
- 
-                float finalAngle = sign * angle;
-                Debug.Log("Final Angle " + finalAngle.ToString());
-
-                Debug.Log(cp.point.x.ToString() + " " + this.lastCollisionX.ToString());
-                //Time.timeScale = 0.0f;
-                Debug.DrawRay(cp.point, cp.normal, Color.red, 1000.0f);
-                if (cp.point.x > this.lastCollisionX)
-                {
-                    this.BallRigRef.AddForce(new Vector3(-1.0f, 0.0f, 1.0f) * this.thrust);
-                }
-                else if(cp.point.x < this.lastCollisionX)
-                {
-                    this.BallRigRef.AddForce(new Vector3(1.0f, 0.0f, 1.0f) * this.thrust);
-                }
-                else if (cp.point.x == this.lastCollisionX)
-                {
-                    this.LaunchBall(1);
-                }
-            }*/
         }
     }
 }
