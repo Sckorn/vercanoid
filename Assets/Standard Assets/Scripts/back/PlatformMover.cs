@@ -10,6 +10,7 @@ public class PlatformMover : MonoBehaviour {
     private bool launched = false;
     private int lastDirection = 0;
     private float lastCollisionX = 10.0f;
+    private float initialTransformX;
 
     public int LastDirection
     {
@@ -25,44 +26,93 @@ public class PlatformMover : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        this.gameObject.rigidbody.freezeRotation = true;
         this.BallGameObject = GameObject.Find("Ball");
         this.RigBodyRef = this.GetComponent<Rigidbody>();
         this.BallRigRef = this.BallGameObject.GetComponent<Rigidbody>();
         this.gameObject.renderer.material.color = Color.red;
         this.BallRigRef.renderer.material.color = Color.green;
+        this.initialTransformX = this.gameObject.transform.position.x;
+        this.BallRigRef.freezeRotation = true;
 	}
 	
 	// Update is called once per frame
 	void Update () {
         float horAxis = Input.GetAxis("Horizontal");
 
-        if (GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().GameInProgress)
+        if (!this.SideWallsCollisionPreDetection(horAxis))
         {
-            this.RigBodyRef.MovePosition(new Vector3(
-                this.transform.position.x + (horAxis * Time.deltaTime * this.speed),
-                this.transform.position.y,
-                this.transform.position.z
-                )
-            );
-
-            if (!this.launched)
+            if (GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().GameInProgress)
             {
-                this.BallRigRef.MovePosition(new Vector3(
-                    this.BallGameObject.transform.position.x + (horAxis * Time.deltaTime * this.speed),
-                    this.BallGameObject.transform.position.y,
-                    this.BallGameObject.transform.position.z
+                this.RigBodyRef.MovePosition(new Vector3(
+                    this.transform.position.x + (horAxis * Time.deltaTime * this.speed),
+                    this.transform.position.y,
+                    this.transform.position.z
                     )
                 );
 
-                if (Input.GetKeyUp(KeyCode.Space))
+                if (!this.launched)
                 {
-                    this.LaunchBall(1);
-                    this.launched = true;
-                    this.lastDirection = 1;
+                    this.BallRigRef.MovePosition(new Vector3(
+                        this.BallGameObject.transform.position.x + (horAxis * Time.deltaTime * this.speed),
+                        this.BallGameObject.transform.position.y,
+                        this.BallGameObject.transform.position.z
+                        )
+                    );
+
+                    if (Input.GetKeyUp(KeyCode.Space))
+                    {
+                        this.LaunchBall(1);
+                        this.launched = true;
+                        this.lastDirection = 1;
+                    }
                 }
             }
         }
 	}
+
+    protected bool SideWallsCollisionPreDetection(float axisValue) // returns true if collision object is at 0.1f distance false if not, whic basically means that methond returns true if collision would have taken place
+    {
+        Vector3 checkDirection = Vector3.zero;
+        if (this.gameObject.transform.position.x > this.initialTransformX)
+        {
+            checkDirection = Vector3.right;
+            if (axisValue < 0)
+            {
+                return false;
+            }
+        }
+        else if (this.gameObject.transform.position.x < this.initialTransformX)
+        {
+            checkDirection = Vector3.left;
+            if (axisValue > 0)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+
+        RaycastHit hit;
+        float distanceToCollision = 0.6f;
+        if (Physics.Raycast(this.transform.position, checkDirection, out hit, distanceToCollision))
+        {
+            if (hit.collider.gameObject.tag == "wall")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     public void LaunchBall(int direction)
     {
@@ -74,17 +124,19 @@ public class PlatformMover : MonoBehaviour {
     {
         this.BallRigRef.velocity = Vector3.zero;
         this.BallRigRef.angularVelocity = Vector3.zero;
+        this.BallRigRef.freezeRotation = false;
         Vector3 newDir = Vector3.zero;
         Vector3 curDir = this.BallRigRef.transform.TransformDirection(Vector3.forward);
         
         float differenceBetweenContactAndCenter = cp.point.x - this.gameObject.transform.position.x;
 
-        if (platformFlag)
+        if (platformFlag) //hit the platform
         {
             if (Mathf.Abs(differenceBetweenContactAndCenter) < 0.1) // presuming it hit the center
             {
                 newDir = Vector3.Reflect(curDir, cp.normal);
                 LaunchBallStraight(newDir, curDir);
+                this.BallRigRef.freezeRotation = true;
             }
             else // hit the side
             {
@@ -94,25 +146,26 @@ public class PlatformMover : MonoBehaviour {
                 this.BallRigRef.transform.rotation = targetRotation;
                 Vector3 targVector = this.BallRigRef.transform.TransformDirection(Vector3.forward);
                 this.BallRigRef.AddForce(targVector * this.thrust);
-
+                this.BallRigRef.freezeRotation = true;
                 GameObject.Find("RotationDummy").transform.rotation = Quaternion.identity;
             }
         }
-        else
+        else // hit something else
         {
             newDir = Vector3.Reflect(curDir, cp.normal);
             LaunchBallStraight(newDir, curDir);
+            this.BallRigRef.freezeRotation = true;
         }
     }
 
     protected void LaunchBallStraight(Vector3 newDir, Vector3 curDir)
     {
         this.BallRigRef.rotation = Quaternion.FromToRotation(Vector3.forward, newDir);
-
+        
         this.BallRigRef.AddForce(newDir * this.thrust);
     }
 
-    public void SimpleReflect(ContactPoint cp)
+    public void SimpleReflect(ContactPoint cp) //currently unused, remove later
     {
         this.BallRigRef.velocity = Vector3.zero;
         this.BallRigRef.angularVelocity = Vector3.zero;
@@ -121,7 +174,7 @@ public class PlatformMover : MonoBehaviour {
         
         newDir = Vector3.Reflect(curDir, cp.normal);
 
-        this.BallRigRef.rotation = Quaternion.FromToRotation(Vector3.forward, newDir);
+        this.BallRigRef.rotation = Quaternion.FromToRotation(Vector3.forward, newDir);;
         this.BallRigRef.AddForce(newDir * this.thrust);
     }
 

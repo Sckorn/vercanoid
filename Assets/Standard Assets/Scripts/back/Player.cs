@@ -34,7 +34,6 @@ public class Player {
         get { return this.highScore; }
     }
 
-
     public Player()
     {
         this.scorePerLevel = new List<int>();
@@ -44,7 +43,7 @@ public class Player {
         EventSystem.OnBallCrush += this.IncCurrentBall;
     }
 
-    public void NextLevel()
+    public void NextLevel(object sender, ChangeLevelEventArgs ea)
     {
         if ((this.currentLevel + 1) >= this.totalLevels) return;
 

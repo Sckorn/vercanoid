@@ -5,8 +5,8 @@ using System.Collections;
 public class EventSystem : MonoBehaviour {
     private MainHelper mhReference;
 
-    public delegate void EndLevelAction();
-    public static event EndLevelAction OnEndLevel;
+    public delegate void ChangeLevelAction(object sender, ChangeLevelEventArgs e);
+    public static event ChangeLevelAction OnEndLevel;
 
     public delegate void EndGameAction(object sender, EndGameEventArgs e);
     public static event EndGameAction OnEndGame;
@@ -21,14 +21,18 @@ public class EventSystem : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         if (this.mhReference.GetCurrentGame().GetCurrentField().TotalBricks == 0)
-            EventSystem.FireEndLevel();
+        {
+            object sender = new object();
+            ChangeLevelEventArgs e = new ChangeLevelEventArgs(this.mhReference.GetCurrentGame().Level, this.mhReference.GetCurrentGame().Level + 1, ChangeLevelReasons.AllBricksDestroyed);
+            EventSystem.FireChangeLevel(sender, e);
+        }
 	}
 
-    public static void FireEndLevel()
+    public static void FireChangeLevel(object sender, ChangeLevelEventArgs e)
     {
         if (EventSystem.OnEndLevel != null)
         {
-            EventSystem.OnEndLevel();
+            EventSystem.OnEndLevel(sender, e);
         }
     }
 

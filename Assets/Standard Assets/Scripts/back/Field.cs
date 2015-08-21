@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 
 public class Field {
-    private int sizeX = 9;
-    private int sizeY = 9;
+    private int sizeX = 17;
+    private int sizeY = 17;
     private GridCell[, ] grid;
     private char[,] charTmpgrid;
     private int totalBricks = 0;
@@ -146,5 +146,23 @@ public class Field {
         {
             --this.totalBricks;
         }
+    }
+
+    public void DestroyAllBricks()
+    {
+        Time.timeScale = 0;
+
+        for (int i = 0; i < this.sizeX; i++)
+        {
+            for (int j = 0; j < this.sizeY; j++)
+            {
+                if (this.grid[i, j].HasBrick)
+                {
+                    GameObject.Find("Morpher").GetComponent<Morpher>().DestroyBrick(this.grid[i, j].ObjectReference);
+                }
+            }
+        }
+
+        Time.timeScale = 1;
     }
 }

@@ -21,7 +21,7 @@ public class BackWallHandler : MonoBehaviour {
             GameObject ballObj = GameObject.Find(c.gameObject.name);
             ballObj.GetComponent<Rigidbody>().velocity = Vector3.zero;
             ballObj.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
-            Vector3 newBallPosition = new Vector3(plateTransform.position.x, plateTransform.position.y, plateTransform.position.z + 0.2f);
+            Vector3 newBallPosition = new Vector3(plateTransform.position.x, 0.25f, plateTransform.position.z + 0.2f);
 
             ballObj.transform.position = newBallPosition;
             ballObj.transform.eulerAngles = Vector3.zero;

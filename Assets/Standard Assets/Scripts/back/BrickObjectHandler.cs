@@ -5,7 +5,7 @@ public class BrickObjectHandler : MonoBehaviour {
     private int hitsToKill;
     private int hitsTookPlace = 0;
     private GridCellCoords coordinates;
-    private Color[] choosedColors = { Color.black, Color.blue, Color.cyan, Color.gray, Color.green,Color.red, Color.yellow};
+    private Color[] choosedColors = { Color.blue, Color.cyan, Color.gray, Color.green,Color.red, Color.yellow, Color.magenta, new Color(0.188f, 0.316f, 0.316f, 1.0f), new Color(1.0f, 0.86f, 0.0f, 1.0f)};
     public int pointsPerHit = 10;
 
     public int HitsToKill
@@ -22,8 +22,8 @@ public class BrickObjectHandler : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-
-        gameObject.renderer.material.color = this.choosedColors[(int)Random.Range(0.0f, (float)this.choosedColors.Length)];
+        gameObject.renderer.material.color = this.choosedColors[Random.Range(0, this.choosedColors.Length)];
+        //EventSystem.OnEndLevel += this.SelfDestruct;
 	}
 	
 	// Update is called once per frame
@@ -36,6 +36,12 @@ public class BrickObjectHandler : MonoBehaviour {
             GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().UpdateUserScoreOnScreen();
         }
 	}
+
+    protected void SelfDestruct(object sender, ChangeLevelEventArgs e)
+    {
+        if(this.gameObject != null)
+            Destroy(this.gameObject);
+    }
 
     void OnCollisionEnter(Collision c)
     {
