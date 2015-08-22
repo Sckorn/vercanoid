@@ -10,6 +10,7 @@ public class Player {
     private int totalLevels;
     private int totalBalls = 3;
     private int currentBall = 1;
+    private GameObject playerScoreInterface;
 
     public int TotalLevels
     {
@@ -34,10 +35,25 @@ public class Player {
         get { return this.highScore; }
     }
 
+    public GameObject PlayerScoreGUI
+    {
+        get { return this.playerScoreInterface; }
+    }
+
     public Player()
     {
         this.scorePerLevel = new List<int>();
         this.scorePerLevel.Add(0);
+        EventSystem.OnEndLevel += this.NextLevel;
+        EventSystem.OnEndGame += this.EndGame;
+        EventSystem.OnBallCrush += this.IncCurrentBall;
+    }
+
+    public Player(GameObject guiReference)
+    {
+        this.scorePerLevel = new List<int>();
+        this.scorePerLevel.Add(0);
+        this.playerScoreInterface = guiReference;
         EventSystem.OnEndLevel += this.NextLevel;
         EventSystem.OnEndGame += this.EndGame;
         EventSystem.OnBallCrush += this.IncCurrentBall;

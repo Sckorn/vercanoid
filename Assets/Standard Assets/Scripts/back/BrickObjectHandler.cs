@@ -23,7 +23,6 @@ public class BrickObjectHandler : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         gameObject.renderer.material.color = this.choosedColors[Random.Range(0, this.choosedColors.Length)];
-        //EventSystem.OnEndLevel += this.SelfDestruct;
 	}
 	
 	// Update is called once per frame
