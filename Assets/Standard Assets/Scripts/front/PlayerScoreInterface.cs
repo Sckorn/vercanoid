@@ -14,9 +14,8 @@ public class PlayerScoreInterface : MonoBehaviour {
 	
 	}
 
-    public void UpdateUserScoreOnScreen()
-    {
-        int score = this.mainHelperReference.GetCurrentGame().GetHumanPlayer().GetLevelScore();   
+    public void UpdateUserScoreOnScreen(int score)
+    {  
         this.gameObject.guiText.text = score.ToString();
     }
 }

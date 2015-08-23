@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,7 +8,7 @@ public class Player {
     private List<int> scorePerLevel;
     private int highScore = 0;
     private int currentLevel = 0;
-    private int totalLevels;
+    private int totalLevels = 2; //change later, dynamically scan level folder to determine total amount of levels
     private int totalBalls = 3;
     private int currentBall = 1;
     private GameObject playerScoreInterface;
@@ -35,6 +36,11 @@ public class Player {
         get { return this.highScore; }
     }
 
+    public int CurrentBall
+    {
+        get { return this.currentBall; }
+    }
+
     public GameObject PlayerScoreGUI
     {
         get { return this.playerScoreInterface; }
@@ -47,6 +53,8 @@ public class Player {
         EventSystem.OnEndLevel += this.NextLevel;
         EventSystem.OnEndGame += this.EndGame;
         EventSystem.OnBallCrush += this.IncCurrentBall;
+        GameObject.Find("FirstPlayerName").GetComponent<Text>().text = this.PlayerName;
+        this.playerScoreInterface = GameObject.Find("LevelScoreText");
     }
 
     public Player(GameObject guiReference)
@@ -57,6 +65,8 @@ public class Player {
         EventSystem.OnEndLevel += this.NextLevel;
         EventSystem.OnEndGame += this.EndGame;
         EventSystem.OnBallCrush += this.IncCurrentBall;
+        GameObject.Find("FirstPlayerName").GetComponent<Text>().text = this.PlayerName;
+        this.playerScoreInterface = GameObject.Find("LevelScoreText");
     }
 
     public void NextLevel(object sender, ChangeLevelEventArgs ea)
@@ -74,7 +84,8 @@ public class Player {
             Debug.LogError(e.Message);
             return;
 #else
-            Application.Quit();
+            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "No such index.", e);
+            EventSystem.FireInterfaceUpdate(this, ev);
 #endif
         }
         finally
@@ -94,7 +105,8 @@ public class Player {
             Debug.LogError(e.Message);
             return;
 #else
-            Application.Quit();
+            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "No such index.", e);
+            EventSystem.FireInterfaceUpdate(this, ev);
 #endif
         }
     }
@@ -119,10 +131,11 @@ public class Player {
 
     protected void IncBallNum(object sender, BallCrushedEventArgs e)
     {
-        Debug.Log("Action called, balls: " + this.currentBall.ToString() + " total: " + this.totalBalls.ToString());
         if (this.currentBall <= this.totalBalls)
         {
             ++this.currentBall;
+            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.BallLost, string.Empty);
+            EventSystem.FireInterfaceUpdate(this, ev);
         }
         else
         {
@@ -183,7 +196,8 @@ public class Player {
             Debug.LogError(e.Message);
             return -1;
 #else
-            Application.Quit();
+            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "No such index.", e);
+            EventSystem.FireInterfaceUpdate(this, ev);
 #endif
         }
 
@@ -206,7 +220,8 @@ public class Player {
             Debug.LogError(e.Message);
             return;
 #else
-            Application.Quit();
+            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "No such index.", e);
+            EventSystem.FireInterfaceUpdate(this, ev);
 #endif
         }
     }

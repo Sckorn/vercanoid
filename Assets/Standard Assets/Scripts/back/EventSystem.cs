@@ -13,6 +13,10 @@ public class EventSystem : MonoBehaviour {
 
     public delegate void BallCrushedAction(object sender, BallCrushedEventArgs e);
     public static event BallCrushedAction OnBallCrush;
+
+    public delegate void InterfaceUpdateAction(object sender, InterfaceUpdateEventArgs e);
+    public static event InterfaceUpdateAction OnInterfaceUpdate;
+
 	// Use this for initialization
 	void Start () {
         this.mhReference = GameObject.Find("MainHelper").GetComponent<MainHelper>();
@@ -33,6 +37,8 @@ public class EventSystem : MonoBehaviour {
         if (EventSystem.OnEndLevel != null)
         {
             EventSystem.OnEndLevel(sender, e);
+            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.LevelChanged, "");
+            EventSystem.FireInterfaceUpdate(sender, ev);
         }
     }
 
@@ -49,6 +55,14 @@ public class EventSystem : MonoBehaviour {
         if (EventSystem.OnBallCrush != null)
         {
             EventSystem.OnBallCrush(sender, e);
+        }
+    }
+
+    public static void FireInterfaceUpdate(object sender, InterfaceUpdateEventArgs e)
+    {
+        if (EventSystem.OnInterfaceUpdate != null)
+        {
+            EventSystem.OnInterfaceUpdate(sender, e);
         }
     }
 }

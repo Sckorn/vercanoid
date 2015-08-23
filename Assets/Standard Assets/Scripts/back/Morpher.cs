@@ -36,4 +36,9 @@ public class Morpher : MonoBehaviour {
         GameObject ballObj = GameObject.Find("Ball");
         Destroy(ballObj);
     }
+
+    public void KillBallIndicator(GameObject indicatorReference)
+    {
+        Destroy(indicatorReference);
+    }
 }

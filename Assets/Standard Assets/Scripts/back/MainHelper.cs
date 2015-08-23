@@ -109,7 +109,8 @@ public class MainHelper : MonoBehaviour {
             Debug.Log(e.Message);
             return;
 #else
-            Application.Quit();
+            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't load bg textures", e);
+            EventSystem.FireInterfaceUpdate(this, ev);
 #endif
         }   
     }
@@ -137,8 +138,9 @@ public class MainHelper : MonoBehaviour {
             Debug.Log(e.Message);
             return;
 #else
-            Application.Quit();
-#endif            
+            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't load audio clips", e);
+            EventSystem.FireInterfaceUpdate(this, ev);
+#endif
         }
     }
 

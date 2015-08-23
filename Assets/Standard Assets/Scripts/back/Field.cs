@@ -85,7 +85,8 @@ public class Field {
             Debug.LogError(e.Message);
             return false;
 #else
-            Application.Quit();
+            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't read from file!", e);
+            EventSystem.FireInterfaceUpdate(this, ev);
 #endif
         }
     }
@@ -121,7 +122,8 @@ public class Field {
             Debug.LogError(e.Message);
             return false;
 #else
-            Application.Quit();
+            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Error Constructing Field", e);
+            EventSystem.FireInterfaceUpdate(this, ev);
 #endif
         }
     }
@@ -139,7 +141,8 @@ public class Field {
             Debug.LogError(e.Message);
             return;
 #else
-            Application.Quit();
+            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "No such index.", e);
+            EventSystem.FireInterfaceUpdate(this, ev);
 #endif
         }
         finally
