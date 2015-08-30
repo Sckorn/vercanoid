@@ -13,6 +13,11 @@ public class GridCell {
         set { this.hasBrick = value; }
     }
 
+    public GameObject ObjectReference
+    {
+        get { return this.realObjRef; }
+    }
+
     public GridCell(int _x, int _y, bool _hasBrick, char brickTypeChar = '\0')
     {
         this.cellCoords.x = _x;
