@@ -57,7 +57,18 @@ public class Game{
     protected void ChangeLevel(object sender, ChangeLevelEventArgs e)
     {
         this.NextLevel();
-        this.CurrentField.DestroyAllBricks();
+        if(e.ChangeReason != ChangeLevelReasons.AllBricksDestroyed)
+            this.CurrentField.DestroyAllBricks();
         this.CurrentField = new Field(this.level);
+    }
+
+    public void PauseGame()
+    {
+        Time.timeScale = 0;
+    }
+
+    public void ResumeGame()
+    {
+        Time.timeScale = 1;
     }
 }

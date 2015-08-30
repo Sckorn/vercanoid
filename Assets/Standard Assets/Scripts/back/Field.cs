@@ -8,7 +8,7 @@ public class Field {
     private int sizeY = 17;
     private GridCell[, ] grid;
     private char[,] charTmpgrid;
-    private int totalBricks = 0;
+    private int totalBricks = 1;
 
     public int TotalBricks
     {
@@ -85,6 +85,7 @@ public class Field {
             Debug.LogError(e.Message);
             return false;
 #else
+            GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't read from file!", e);
             EventSystem.FireInterfaceUpdate(this, ev);
 #endif
@@ -122,6 +123,7 @@ public class Field {
             Debug.LogError(e.Message);
             return false;
 #else
+            GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Error Constructing Field", e);
             EventSystem.FireInterfaceUpdate(this, ev);
 #endif
@@ -141,6 +143,7 @@ public class Field {
             Debug.LogError(e.Message);
             return;
 #else
+            GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "No such index.", e);
             EventSystem.FireInterfaceUpdate(this, ev);
 #endif

@@ -16,7 +16,6 @@ public class MainHelper : MonoBehaviour {
     void Awake()
     {
         this.currentGame = new Game();
-        
     }
 	
     // Use this for initialization
@@ -63,11 +62,6 @@ public class MainHelper : MonoBehaviour {
             ChangeLevelEventArgs e = new ChangeLevelEventArgs(this.currentGame.Level, this.currentGame.Level, ChangeLevelReasons.NextLevelKeyPressed);
             EventSystem.FireChangeLevel(sender, e);
         }
-
-        if (Input.GetKeyUp(KeyCode.Q))
-        { 
-            
-        }
 #endif
 	}
 
@@ -109,6 +103,7 @@ public class MainHelper : MonoBehaviour {
             Debug.Log(e.Message);
             return;
 #else
+            this.currentGame.PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't load bg textures", e);
             EventSystem.FireInterfaceUpdate(this, ev);
 #endif
@@ -138,6 +133,7 @@ public class MainHelper : MonoBehaviour {
             Debug.Log(e.Message);
             return;
 #else
+            this.currentGame.PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't load audio clips", e);
             EventSystem.FireInterfaceUpdate(this, ev);
 #endif

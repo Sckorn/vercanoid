@@ -5,13 +5,20 @@ using System.Collections.Generic;
 
 public class Player {
     private string playerName = "Player1";
+    private Players playerIdentificator;
     private List<int> scorePerLevel;
     private int highScore = 0;
     private int currentLevel = 0;
-    private int totalLevels = 2; //change later, dynamically scan level folder to determine total amount of levels
+    private int totalLevels = 2; //change later, dynamically scan level folder to determine total amount of levels or maybe some xml config
     private int totalBalls = 3;
     private int currentBall = 1;
     private GameObject playerScoreInterface;
+    private GameObject ballReference;
+
+    public Players PlayerID
+    {
+        get { return this.playerIdentificator; }
+    }
 
     public int TotalLevels
     {
@@ -57,11 +64,27 @@ public class Player {
         this.playerScoreInterface = GameObject.Find("LevelScoreText");
     }
 
-    public Player(GameObject guiReference)
+    public Player(GameObject guiReference) //excessive remove later
     {
         this.scorePerLevel = new List<int>();
         this.scorePerLevel.Add(0);
         this.playerScoreInterface = guiReference;
+        EventSystem.OnEndLevel += this.NextLevel;
+        EventSystem.OnEndGame += this.EndGame;
+        EventSystem.OnBallCrush += this.IncCurrentBall;
+        GameObject.Find("FirstPlayerName").GetComponent<Text>().text = this.PlayerName;
+        this.playerScoreInterface = GameObject.Find("LevelScoreText");
+    }
+
+    public Player(Players player)
+    {
+        this.playerIdentificator = player;
+        if (this.playerIdentificator == Players.FirstPlayer)
+            this.ballReference = GameObject.Find("Morpher").GetComponent<Morpher>().firstPlayerBallReference;
+        else
+            this.ballReference = GameObject.Find("Morpher").GetComponent<Morpher>().secondPlayerBallReference;
+        this.scorePerLevel = new List<int>();
+        this.scorePerLevel.Add(0);
         EventSystem.OnEndLevel += this.NextLevel;
         EventSystem.OnEndGame += this.EndGame;
         EventSystem.OnBallCrush += this.IncCurrentBall;
@@ -84,6 +107,7 @@ public class Player {
             Debug.LogError(e.Message);
             return;
 #else
+            GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "No such index.", e);
             EventSystem.FireInterfaceUpdate(this, ev);
 #endif
@@ -105,6 +129,7 @@ public class Player {
             Debug.LogError(e.Message);
             return;
 #else
+            GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "No such index.", e);
             EventSystem.FireInterfaceUpdate(this, ev);
 #endif
@@ -172,10 +197,7 @@ public class Player {
 
         ballObj = GameObject.Find("Ball");
 
-        //if (ballObj != null)
-        //{
-            GameObject.Find("Morpher").GetComponent<Morpher>().KillTheBall();
-        //}
+        GameObject.Find("Morpher").GetComponent<Morpher>().KillTheBall();
     }
 
     public int GetLevelScore(int levelNum = -1)
@@ -196,6 +218,7 @@ public class Player {
             Debug.LogError(e.Message);
             return -1;
 #else
+            GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "No such index.", e);
             EventSystem.FireInterfaceUpdate(this, ev);
 #endif
@@ -220,6 +243,7 @@ public class Player {
             Debug.LogError(e.Message);
             return;
 #else
+            GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "No such index.", e);
             EventSystem.FireInterfaceUpdate(this, ev);
 #endif

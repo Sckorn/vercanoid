@@ -4,6 +4,9 @@ using System.Collections;
 public class Morpher : MonoBehaviour {
     public GameObject brickPrefab;
 
+    public GameObject firstPlayerBallReference = null;
+    public GameObject secondPlayerBallReference = null;
+
 	// Use this for initialization
 	void Start () {
 	
