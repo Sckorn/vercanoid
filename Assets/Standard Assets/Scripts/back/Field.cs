@@ -68,7 +68,7 @@ public class Field {
                     {
                         if (line[j] == '_' || line[j] == 'x')
                         {
-                            this.charTmpgrid[i, k] = line[j];
+                            this.charTmpgrid[k, i] = line[j];
                             k++;
                         }
                     }
@@ -88,6 +88,7 @@ public class Field {
             GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't read from file!", e);
             EventSystem.FireInterfaceUpdate(this, ev);
+            return false;
 #endif
         }
     }
@@ -126,6 +127,7 @@ public class Field {
             GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Error Constructing Field", e);
             EventSystem.FireInterfaceUpdate(this, ev);
+            return false;
 #endif
         }
     }

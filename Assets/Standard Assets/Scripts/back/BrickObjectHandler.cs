@@ -8,6 +8,7 @@ public class BrickObjectHandler : MonoBehaviour {
     private Color[] choosedColors = { Color.blue, Color.cyan, Color.gray, Color.green,Color.red, Color.yellow, Color.magenta, new Color(0.188f, 0.316f, 0.316f, 1.0f), new Color(1.0f, 0.86f, 0.0f, 1.0f)};
     public int pointsPerHit = 10;
     private MainHelper mhReference;
+    private Object thisLock = new Object();
 
     public int HitsToKill
     {
@@ -47,20 +48,28 @@ public class BrickObjectHandler : MonoBehaviour {
 
     void OnCollisionEnter(Collision c)
     {
-        if (this.hitsTookPlace == this.hitsToKill)
-        {
             if (c.gameObject.name == "Ball")
             {
-                GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], false);
-            }
-        }
-        else
-        {
-            if (c.gameObject.name == "Ball")
-            {
-                GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], false);
+                //GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], false);
+                DelayedCollision dc = new DelayedCollision(c.contacts[0], false);
+                GameObject.Find("MainHelper").GetComponent<MainHelper>().AddCollisionToQueue(dc);
+                /*if(c.contacts[0].point.z > this.gameObject.transform.position.z)
+                    GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], this.gameObject, GameObject.Find("RotationDummy"), 1);
+                else
+                    GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], this.gameObject, GameObject.Find("ReverseRotationDummy"), -1);*/
                 ++this.hitsTookPlace;
             }
-        }
+            /*if (this.hitsTookPlace == this.hitsToKill)
+            {
+                if (c.gameObject.name == "Ball")
+                {
+                    //GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], false);
+                    GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], this.gameObject);
+                }
+            }
+            else
+            {*/
+                
+            //}
     }
 }

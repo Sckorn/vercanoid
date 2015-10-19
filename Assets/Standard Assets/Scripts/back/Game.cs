@@ -7,6 +7,19 @@ public class Game{
     private int level = 0;
     private Field CurrentField;
     private Player HumanPlayer;
+    private bool gamePaused = false;
+    private GameModes currentGameMode;
+
+    public GameModes CurrentGameMode
+    {
+        get { return this.currentGameMode; }
+        set { this.currentGameMode = value; }
+    }
+
+    public bool GamePaused
+    {
+        get { return this.gamePaused; }
+    }
 
     public int Level
     {
@@ -27,6 +40,20 @@ public class Game{
         EventSystem.OnEndLevel += this.ChangeLevel;
     }
 
+    public Game(GameModes _gameMode)
+    {
+        this.gameInProgress = true;
+        this.CurrentField = new Field(level);
+        this.HumanPlayer = new Player(Players.FirstPlayer);
+        
+        if(_gameMode == GameModes.Versus)
+        {
+            this.HumanPlayer = new Player(Players.SecondPlayer);
+        }
+
+        EventSystem.OnEndLevel += this.ChangeLevel;
+    }
+
     public bool LevelIsOver()
     {
         return true;
@@ -42,7 +69,7 @@ public class Game{
         return this.HumanPlayer;
     }
 
-    public void UpdateUserScoreOnScreen()
+    public void UpdateUserScoreOnScreen() //deprecated
     {
         int score = this.HumanPlayer.GetLevelScore();
 
@@ -65,10 +92,18 @@ public class Game{
     public void PauseGame()
     {
         Time.timeScale = 0;
+        this.gamePaused = true;
+        object sender = new object();
+        InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.GamePaused, "", this.GamePaused);
+        EventSystem.FireInterfaceUpdate(sender, e);
     }
 
     public void ResumeGame()
     {
         Time.timeScale = 1;
+        this.gamePaused = false;
+        object sender = new object();
+        InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.GamePaused, "", this.GamePaused);
+        EventSystem.FireInterfaceUpdate(sender, e);
     }
 }

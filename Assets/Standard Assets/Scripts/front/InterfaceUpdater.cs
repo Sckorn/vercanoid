@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.UI;
 using System;
@@ -14,6 +16,7 @@ public class InterfaceUpdater : MonoBehaviour
     public GameObject[] secondPlayerBalls = null;
     public GameObject exceptionCanvasReference = null;
     public GameObject exceptionTextReference = null;
+    public GameObject pauseMenuCanvasReference = null;
 
     /*
      
@@ -41,7 +44,7 @@ public class InterfaceUpdater : MonoBehaviour
                 if (ballLostSender.PlayerScoreGUI.Equals(this.firstPlayerScore))
                 {
                     int index = ballLostSender.CurrentBall;
-                    GameObject target = this.firstPlayerBalls.objectReferences[index - 2];
+                    GameObject target = this.firstPlayerBalls.objectReferences[index - 2]; //don't ask, just don't...
                     if(target != null) // balls start at one [1]
                     {
                         GameObject.Find("Morpher").GetComponent<Morpher>().KillBallIndicator(target);
@@ -77,6 +80,9 @@ public class InterfaceUpdater : MonoBehaviour
                 if(e.ExceptionUpdate)
                     this.ShowException(e);
                 break;
+            case InterfaceUpdateReasons.GamePaused:
+                this.ShowPauseMenu(e);
+                break;
             case InterfaceUpdateReasons.UnknownReason: break;
         }
     }
@@ -87,5 +93,23 @@ public class InterfaceUpdater : MonoBehaviour
         Time.timeScale = 0;
         this.exceptionCanvasReference.GetComponent<Canvas>().enabled = true;
         this.exceptionTextReference.GetComponent<Text>().text += " " + e.UpdatedValue;
+    }
+
+    public void ResumeButtonClickHandler()
+    {
+        MainHelper mh = GameObject.Find("MainHelper").GetComponent<MainHelper>();
+        mh.GetCurrentGame().ResumeGame();
+    }
+
+    protected void ShowPauseMenu(InterfaceUpdateEventArgs e)
+    {
+        if (e.GamePaused)
+        {
+            GameObject.Find("PauseGameCanvas").GetComponent<Canvas>().enabled = true;
+        }
+        else
+        {
+            GameObject.Find("PauseGameCanvas").GetComponent<Canvas>().enabled = false;
+        }
     }
 }

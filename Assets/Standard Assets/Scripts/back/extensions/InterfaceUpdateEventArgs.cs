@@ -33,6 +33,13 @@ public class InterfaceUpdateEventArgs : EventArgs
         get { return this.thrownException; }
     }
 
+    private bool gamePaused;
+
+    public bool GamePaused
+    {
+        get { return this.gamePaused; }
+    }
+
     public InterfaceUpdateEventArgs(InterfaceUpdateReasons updateReason, string updatedValue, Exception thrownException = null)
     {
         this.updateReason = updateReason;
@@ -45,4 +52,10 @@ public class InterfaceUpdateEventArgs : EventArgs
         }
     }
 
+    public InterfaceUpdateEventArgs(InterfaceUpdateReasons updateReason, string updatedValue, bool gamePaused)
+    {
+        this.updateReason = updateReason;
+        this.updatedValue = updatedValue;
+        this.gamePaused = gamePaused;
+    }
 }

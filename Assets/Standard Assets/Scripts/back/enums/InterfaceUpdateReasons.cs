@@ -7,5 +7,6 @@ public enum InterfaceUpdateReasons {
     ExceptionThrown,
     LevelChanged,
     GameOver,
+    GamePaused,
     UnknownReason
 }

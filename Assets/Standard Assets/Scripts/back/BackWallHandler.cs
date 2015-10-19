@@ -2,7 +2,6 @@
 using System.Collections;
 
 public class BackWallHandler : MonoBehaviour {
-
 	// Use this for initialization
 	void Start () {
 	
@@ -30,7 +29,7 @@ public class BackWallHandler : MonoBehaviour {
         Vector3 newBallPosition = new Vector3(plateTransform.position.x, 0.25f, plateTransform.position.z + 0.2f);
 
         ballObj.transform.position = newBallPosition;
-        ballObj.transform.eulerAngles = Vector3.zero;
+        ballObj.transform.rotation = Quaternion.identity;
         PlatformMover pm = GameObject.Find("Platform").GetComponent<PlatformMover>();
         pm.Launched = false;
         object sender = new object();

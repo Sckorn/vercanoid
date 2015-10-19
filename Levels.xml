@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<levelFiles totalLevels="2">
+  <levelFile encrypted="0" filePath="Data/Levels/level0.txt" levelNumber="0" userLevel="0" />
+  <levelFile encrypted="0" filePath="Data/Levels/level1.txt" levelNumber="1" userLevel="0" />
+</levelFiles>
