@@ -39,6 +39,8 @@ public class PlatformMover : MonoBehaviour {
         this.BallRigRef.freezeRotation = true;
         EventSystem.OnEndLevel += this.StopTheBall;
         EventSystem.OnEndLevel += this.BallToInitialPosition;
+        EventSystem.OnEndGame += this.BallToInitialPosition;
+        EventSystem.OnEndGame += this.StopTheBall;
 	}
 	
 	// Update is called once per frame
@@ -91,6 +93,13 @@ public class PlatformMover : MonoBehaviour {
         this.BallGameObject.transform.position = new Vector3(this.initialTransform.position.x, this.initialTransform.position.y, this.initialTransform.position.z + 0.2f);
     }
 
+    protected void BallToInitialPosition(object sender, EndGameEventArgs e)
+    {
+        this.StopTheBall();
+        this.Launched = false;
+        this.BallGameObject.transform.position = new Vector3(this.initialTransform.position.x, this.initialTransform.position.y, this.initialTransform.position.z + 0.2f);
+    }
+
     protected void StopTheBall()
     {
         this.BallRigRef.velocity = Vector3.zero;
@@ -98,6 +107,12 @@ public class PlatformMover : MonoBehaviour {
     }
 
     protected void StopTheBall(object sender, ChangeLevelEventArgs e)
+    {
+        this.BallRigRef.velocity = Vector3.zero;
+        this.BallRigRef.angularVelocity = Vector3.zero;
+    }
+
+    protected void StopTheBall(object sender, EndGameEventArgs e)
     {
         this.BallRigRef.velocity = Vector3.zero;
         this.BallRigRef.angularVelocity = Vector3.zero;

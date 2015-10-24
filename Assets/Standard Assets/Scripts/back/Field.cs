@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +29,6 @@ public class Field {
         set { this.sizeY = value; }
     }
 
-
     public Field()
     {
         this.ConstructGrid();
@@ -48,6 +48,11 @@ public class Field {
 
     private bool ReadFieldFromFile(int levelNum = 0)
     {
+        if (MainHelper.CurrentGameSession != null)
+        {
+            if(MainHelper.CurrentGameSession.CurrentLevels[levelNum] != null)
+                return this.ReadFieldFromFile(levelNum, true);
+        }
 #if UNITY_EDITOR
         string path = @"Assets\Standard Assets\Resources\";
 #else
@@ -90,6 +95,77 @@ public class Field {
             EventSystem.FireInterfaceUpdate(this, ev);
             return false;
 #endif
+        }
+    }
+
+    private bool ReadFieldFromFile(int levelNum, bool bGameSessionFlag)
+    {
+#if UNITY_EDITOR
+        string path = @"Temp";
+#else
+        string path = @"Data/Temp";
+#endif       
+        string decryptedFile = string.Empty;
+        try
+        {
+            string levelPath = MainHelper.CurrentGameSession.CurrentLevels[levelNum].LevelPath;
+            Debug.LogWarning(levelPath);
+            this.charTmpgrid = new char[this.sizeX, this.sizeY];
+            int i = 0;
+            decryptedFile = path + @"/" + DateTime.Now.GetHashCode().ToString() + @".xml";
+
+            LevelFileCrypto.DecryptFile(levelPath, decryptedFile, "");
+
+            using (StreamReader sr = new StreamReader(decryptedFile))
+            {
+                while (sr.Peek() >= 0)
+                {
+                    string line = sr.ReadLine();
+                    int k = 0;
+                    for (int j = 0; j < line.Length; j++)
+                    {
+                        if (line[j] == '_' || line[j] == 'x')
+                        {
+                            this.charTmpgrid[k, i] = line[j];
+                            k++;
+                        }
+                    }
+                    i++;
+                }
+            }
+
+            return true;
+        }
+        catch (Exception e)
+        {
+#if UNITY_EDITOR
+            Debug.LogError("Can't read from file!");
+            Debug.LogError(e.Message);
+            return false;
+#else
+            GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().PauseGame();
+            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't read from file!", e);
+            EventSystem.FireInterfaceUpdate(this, ev);
+            return false;
+#endif
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(decryptedFile);
+            }
+            catch (Exception ex)
+            {
+#if UNITY_EDITOR
+                Debug.LogError("Can't delete file!");
+                Debug.LogError(ex.Message);
+#else
+                GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().PauseGame();
+                InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't read from file!", ex);
+                EventSystem.FireInterfaceUpdate(this, ev);
+#endif
+            }
         }
     }
 

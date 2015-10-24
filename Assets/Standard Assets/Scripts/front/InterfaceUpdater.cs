@@ -17,16 +17,21 @@ public class InterfaceUpdater : MonoBehaviour
     public GameObject exceptionCanvasReference = null;
     public GameObject exceptionTextReference = null;
     public GameObject pauseMenuCanvasReference = null;
+    public GameObject endGameCanvasReference = null;
 
     /*
      
      * TODO: add exception canvas and text
      * 
      */
+    void Awake()
+    {
+        EventSystem.OnInterfaceUpdate += this.UpdateInterface;
+    }
 
     void Start()
     {
-        EventSystem.OnInterfaceUpdate += this.UpdateInterface;
+        EventSystem.OnEndGame += this.ShowEndGameMenu;
     }
 
     void Update()
@@ -110,6 +115,14 @@ public class InterfaceUpdater : MonoBehaviour
         else
         {
             GameObject.Find("PauseGameCanvas").GetComponent<Canvas>().enabled = false;
+        }
+    }
+
+    protected void ShowEndGameMenu(object sender, EndGameEventArgs e)
+    {
+        if (this.endGameCanvasReference != null)
+        {
+            this.endGameCanvasReference.GetComponent<Canvas>().enabled = true;
         }
     }
 }

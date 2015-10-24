@@ -48,7 +48,12 @@ public static class LevelFileCrypto {
         fsEncrypted.Close();
         fsInput.Close();
     }
-
+    /// <summary>
+    /// Decrypts an encrypted file
+    /// </summary>
+    /// <param name="sInputFilePath">Source file path</param>
+    /// <param name="sOutputFilePath">Destination file path</param>
+    /// <param name="sKey">Encryption key</param>
     static public void DecryptFile(string sInputFilePath, string sOutputFilePath, string sKey)
     {
         if (sKey.Equals(string.Empty)) sKey = LevelFileCrypto.PermanentKey;

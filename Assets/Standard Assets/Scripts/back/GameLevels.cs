@@ -4,12 +4,18 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class GameLevels {
-    private int totalLevels = 0;
+    private int totalLevels = 1;
     private GameLevel[] CurrentLevels = new GameLevel[1];
 
     public int TotalLevels
     {
         get { return this.totalLevels; }
+    }
+
+    public string this[string param]
+    {
+        get { if (param.Equals("levelFiles")) return this.totalLevels.ToString(); return string.Empty; }
+        set { if (param.Equals("levelFiles")) int.TryParse(value, out this.totalLevels); }
     }
 
     public GameLevel this[int param]
@@ -86,9 +92,15 @@ public sealed class GameLevel {
 
             if (param.Equals("userLevel"))
             {
-                if (!bool.TryParse(value, out this.userLevelFlag))
+                int test = -1;
+                if (!int.TryParse(value, out test))
                 {
                     throw new Exception("Wrong type for the specified field");
+                }
+                else
+                {
+                    if (test == 0) this.userLevelFlag = false;
+                    else this.userLevelFlag = true;
                 }
             }
 
@@ -99,9 +111,15 @@ public sealed class GameLevel {
 
             if (param.Equals("encrypted"))
             {
-                if (!bool.TryParse(value, out this.levelFileEncrypted))
+                int test = -1;
+                if (!int.TryParse(value, out test))
                 {
                     throw new Exception("Wrong type for the specified field");
+                }
+                else
+                {
+                    if (test == 0) this.levelFileEncrypted = false;
+                    else this.levelFileEncrypted = true;
                 }
             }
         }

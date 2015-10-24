@@ -14,11 +14,14 @@ public class MainHelper : MonoBehaviour {
     private AudioSource mainAudioSource;
     private Queue<DelayedCollision> collisionQueue = new Queue<DelayedCollision>();
     public static GameSession CurrentGameSession = null;
+    private bool EncryptionInProcess = false;
+    private int CurrentEncryptingLevel = 0;
+    private string[] UserLevels = null;
+    private int UserLevelIndex = -1;
+    private bool UserLevelsCoroutine = false;
 
     void Awake()
     {
-        LevelFileCrypto.GenerateSessionCryptoKey();
-        MainHelper.CurrentGameSession = new GameSession();
         this.currentGame = new Game();
     }
 	
@@ -27,6 +30,10 @@ public class MainHelper : MonoBehaviour {
         this.clips = new List<AudioClip>();
         this.mainAudioSource = GameObject.Find("Main Camera").GetComponent<AudioSource>();
         this.startingBallPosition = GameObject.Find("Ball").transform;
+        MainHelper.CurrentGameSession = new GameSession();
+
+        StartCoroutine("UserLevelsAddition");
+
 #if UNITY_EDITOR
         //this.BgLoader();
         this.BgAudioLoader();
@@ -40,6 +47,14 @@ public class MainHelper : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        Debug.Log(this.currentGame.Level.ToString());
+
+        if (this.currentGame.Level >= MainHelper.CurrentGameSession.CurrentLevels.TotalLevels)
+        {
+            Time.timeScale = 0;
+            EndGameEventArgs e = new EndGameEventArgs(this.currentGame.GetHumanPlayer().HighScore, this.currentGame.GetHumanPlayer().PlayerName, this.currentGame.Level, EndGameReasons.CompletedAllLevels);
+            EventSystem.FireEndGame(this, e);
+        }
         //Debug.Log(this.currentGame.GetHumanPlayer().CurrentBall.ToString());
         if (Input.GetButtonUp("PauseGame"))
         {
@@ -80,6 +95,18 @@ public class MainHelper : MonoBehaviour {
             this.collisionQueue.Clear();
         }
 
+        if (!this.UserLevelsCoroutine)
+        if (this.CurrentEncryptingLevel < MainHelper.CurrentGameSession.CurrentLevels.TotalLevels)
+        if (!this.EncryptionInProcess)
+            if (!MainHelper.CurrentGameSession.CurrentLevels[this.CurrentEncryptingLevel].LevelEncrypted)
+            {
+                StartCoroutine("EncryptionCoroutine");
+            }
+            else
+            {
+                this.CurrentEncryptingLevel++;
+            }
+
 #if UNITY_EDITOR //debug level switching
         if (Input.GetKeyUp(KeyCode.E))
         {
@@ -89,6 +116,133 @@ public class MainHelper : MonoBehaviour {
         }
 #endif
 	}
+
+    private IEnumerator EncryptionCoroutine()
+    {
+        this.EncryptionInProcess = true;
+        Debug.Log("Coroutine");
+#if UNITY_EDITOR
+        string targetPath = @"Temp";
+#else
+        string targetPath = @"Data/Temp";
+#endif
+
+        yield return new WaitForSeconds(5.0f);
+
+        string filePath = targetPath + @"/" + DateTime.Now.GetHashCode().ToString() + ".txt";
+        Debug.Log(MainHelper.CurrentGameSession.CurrentLevels[this.CurrentEncryptingLevel].LevelPath);
+        Debug.Log(filePath);
+
+        try
+        {
+            LevelFileCrypto.EncryptFile(MainHelper.CurrentGameSession.CurrentLevels[this.CurrentEncryptingLevel].LevelPath, filePath, string.Empty);
+        }
+        catch (Exception e)
+        {
+#if UNITY_EDITOR
+            Debug.Log("Error encrypting file");
+            Debug.Log(e.Message);
+#else
+            /*do a little later*/
+#endif
+        }
+
+        yield return new WaitForSeconds(5.0f);
+
+        try
+        {
+            byte[] allBytes = File.ReadAllBytes(filePath);
+            File.WriteAllBytes(MainHelper.CurrentGameSession.CurrentLevels[this.CurrentEncryptingLevel].LevelPath, allBytes);
+        }
+        catch (Exception e)
+        {
+#if UNITY_EDITOR
+            Debug.Log("Error encrypting file");
+            Debug.Log(e.Message);
+#else
+            /*do a little later*/
+#endif
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(filePath);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("Can't delete temp file");
+                Debug.Log(ex.Message);
+            }
+        }
+
+        yield return new WaitForSeconds(5.0f);
+
+        MainHelper.CurrentGameSession.CurrentLevels[this.CurrentEncryptingLevel].LevelEncrypted = true;
+
+        MainHelper.CurrentGameSession.WriteXml("", GameXmlTypes.LevelsXml);
+        this.CurrentEncryptingLevel++;
+        this.EncryptionInProcess = false;
+    }
+
+    private IEnumerator UserLevelsAddition()
+    {
+        this.UserLevelsCoroutine = true;
+        Debug.Log("User levels coroutine");
+        string userPath = @"UserData/Levels";
+
+        if (!Directory.Exists(userPath)) { StopCoroutine("UserLevelsAddition"); this.UserLevelsCoroutine = false; }
+
+        yield return new WaitForSeconds(5.0f);
+
+        this.UserLevels = Directory.GetFiles(userPath);
+
+        if (this.UserLevels.Length > 0)
+        {
+            this.UserLevelIndex = 0;
+            yield return new WaitForSeconds(2.5f);
+
+            for (int i = this.UserLevelIndex; i < this.UserLevels.Length; i++)
+            {
+                this.UserLevels[i] = this.UserLevels[i].Replace("\\", "/");
+                if (!MainHelper.CurrentGameSession.LevelExists(this.UserLevels[i]))
+                {
+                    Debug.Log(this.UserLevels[i]);
+                    int forthcomingLevelIndex = MainHelper.CurrentGameSession.CurrentLevels.TotalLevels;
+                    GameLevel gl = new GameLevel();
+                    gl.LevelEncrypted = false;
+                    gl.LevelNumber = forthcomingLevelIndex;
+                    gl.LevelPath = this.UserLevels[i];
+                    gl.UserLevel = true;
+
+                    yield return new WaitForSeconds(1.0f);
+
+                    try
+                    {
+                        MainHelper.CurrentGameSession.CurrentLevels[forthcomingLevelIndex] = gl;
+                    }
+                    catch (Exception e)
+                    {
+#if UNITY_EDITOR
+                        Debug.Log("Error adding user level");
+                        Debug.Log(e.Message);
+#else
+                        InterfaceUpdateEventArgs ea = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, e.Message, e);
+                        EventSystem.FireInterfaceUpdate(this, ea);
+#endif
+                    }
+                }
+
+                yield return new WaitForSeconds(10.0f);
+            }
+        }
+        else
+        {
+            this.UserLevelsCoroutine = false;
+            StopCoroutine("UserLevelsAddition");
+        }
+        this.UserLevelsCoroutine = false;
+    }
 
     public void AddCollisionToQueue(DelayedCollision dc)
     {
@@ -133,9 +287,9 @@ public class MainHelper : MonoBehaviour {
             Debug.Log(e.Message);
             return;
 #else
-            this.currentGame.PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't load bg textures", e);
             EventSystem.FireInterfaceUpdate(this, ev);
+            return;
 #endif
         }   
     }
@@ -163,9 +317,9 @@ public class MainHelper : MonoBehaviour {
             Debug.Log(e.Message);
             return;
 #else
-            this.currentGame.PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't load audio clips", e);
             EventSystem.FireInterfaceUpdate(this, ev);
+            return;
 #endif
         }
     }
@@ -230,9 +384,9 @@ public class MainHelper : MonoBehaviour {
             Debug.Log(e.Message);
             return;
 #else
-            this.currentGame.PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't load bg textures", e);
             EventSystem.FireInterfaceUpdate(this, ev);
+            return;
 #endif
         }
     }
@@ -301,9 +455,9 @@ public class MainHelper : MonoBehaviour {
             Debug.Log(e.Message);
             return;
 #else
-            this.currentGame.PauseGame();
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't load audio clips", e);
             EventSystem.FireInterfaceUpdate(this, ev);
+            return;
 #endif
         }
     }
@@ -349,5 +503,15 @@ public class MainHelper : MonoBehaviour {
             return true;
 
         return false;
+    }
+
+    public void ToMainMenu()
+    {
+        Application.LoadLevel(0);
+    }
+
+    public void Retry()
+    {
+        Application.LoadLevel(1);
     }
 }
