@@ -24,8 +24,11 @@ public class BrickObjectHandler : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        gameObject.renderer.material.color = this.choosedColors[Random.Range(0, this.choosedColors.Length)];
-        this.mhReference = GameObject.Find("MainHelper").GetComponent<MainHelper>();
+        if (GameObject.Find("MainHelper") != null)
+        {
+            gameObject.renderer.material.color = this.choosedColors[Random.Range(0, this.choosedColors.Length)];
+            this.mhReference = GameObject.Find("MainHelper").GetComponent<MainHelper>();
+        }
 	}
 	
 	// Update is called once per frame
@@ -33,10 +36,13 @@ public class BrickObjectHandler : MonoBehaviour {
         if (this.hitsTookPlace == this.hitsToKill)
         {
             Destroy(gameObject);
-            this.mhReference.GetCurrentGame().GetCurrentField().BrickDestroyed(this.coordinates);
-            this.mhReference.GetCurrentGame().GetHumanPlayer().IncreaseLevelScore(this.hitsToKill * this.pointsPerHit);
-            InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ScoreIncreased, this.mhReference.GetCurrentGame().GetHumanPlayer().GetLevelScore().ToString());
-            EventSystem.FireInterfaceUpdate(this.mhReference.GetCurrentGame().GetHumanPlayer(), e);
+            if (this.mhReference != null)
+            {
+                this.mhReference.GetCurrentGame().GetCurrentField().BrickDestroyed(this.coordinates);
+                this.mhReference.GetCurrentGame().GetHumanPlayer().IncreaseLevelScore(this.hitsToKill * this.pointsPerHit);
+                InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ScoreIncreased, this.mhReference.GetCurrentGame().GetHumanPlayer().GetLevelScore().ToString());
+                EventSystem.FireInterfaceUpdate(this.mhReference.GetCurrentGame().GetHumanPlayer(), e);
+            }
         }
 	}
 

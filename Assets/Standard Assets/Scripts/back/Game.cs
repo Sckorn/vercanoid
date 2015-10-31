@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using UnityEngine.UI;
 
@@ -38,6 +39,7 @@ public class Game{
         this.CurrentField = new Field(level);
         this.HumanPlayer = new Player();
         EventSystem.OnEndLevel += this.ChangeLevel;
+        EventSystem.OnEndGame += this.EndGame;
     }
 
     public Game(GameModes _gameMode)
@@ -52,6 +54,7 @@ public class Game{
         }
 
         EventSystem.OnEndLevel += this.ChangeLevel;
+        EventSystem.OnEndGame += this.EndGame;
     }
 
     public bool LevelIsOver()
@@ -86,7 +89,14 @@ public class Game{
         this.NextLevel();
         if(e.ChangeReason != ChangeLevelReasons.AllBricksDestroyed)
             this.CurrentField.DestroyAllBricks();
-        this.CurrentField = new Field(this.level);
+        Debug.LogWarning(this.level.ToString() + " " + MainHelper.CurrentGameSession.CurrentLevels.TotalLevels.ToString());
+        if (this.level == MainHelper.CurrentGameSession.CurrentLevels.TotalLevels)
+        {
+            EndGameEventArgs ea = new EndGameEventArgs(this.HumanPlayer.HighScore, this.HumanPlayer.PlayerName, this.level, EndGameReasons.CompletedAllLevels);
+            EventSystem.FireEndGame(this, ea);
+        }
+        else
+            this.CurrentField = new Field(this.level);
     }
 
     public void PauseGame()
@@ -105,5 +115,10 @@ public class Game{
         object sender = new object();
         InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.GamePaused, "", this.GamePaused);
         EventSystem.FireInterfaceUpdate(sender, e);
+    }
+
+    public void EndGame(object sender, EndGameEventArgs e)
+    {
+        this.gameInProgress = false;
     }
 }

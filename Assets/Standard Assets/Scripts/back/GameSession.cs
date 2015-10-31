@@ -178,7 +178,7 @@ public class GameSession {
         {
             this.BufferedLevelsXmlContents = output;
             Debug.Log(output);
-            Debug.Log(totalLevelsFromFile.ToString() + " " + this.CurrentLevels.TotalLevels.ToString());
+            Debug.Log(totalLevelsFromFile.ToString() + " " + this.CurrentLevels.TotalLevels.ToString() + " " + this.CurrentLevels.ActualArrayLength.ToString());
             if (File.Exists(resultFile))
             {
                 try

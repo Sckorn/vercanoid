@@ -174,7 +174,11 @@ public class Field {
         try
         {
             this.grid = new GridCell[this.sizeX, this.sizeY];
-            this.ReadFieldFromFile(forLevel);
+
+            if(MainHelper.CurrentGameSession != null)
+                this.ReadFieldFromFile(forLevel, true);
+            else
+                this.ReadFieldFromFile(forLevel);
             for (int i = 0; i < this.sizeX; i++)
             {
                 for (int j = 0; j < this.sizeY; j++)
@@ -229,6 +233,7 @@ public class Field {
         finally
         {
             --this.totalBricks;
+            Debug.LogWarning(this.totalBricks.ToString());
         }
     }
 

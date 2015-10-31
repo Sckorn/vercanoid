@@ -19,6 +19,7 @@ public class MainHelper : MonoBehaviour {
     private string[] UserLevels = null;
     private int UserLevelIndex = -1;
     private bool UserLevelsCoroutine = false;
+    private bool LevelFilesExistenceCheckRoutine = true;
 
     void Awake()
     {
@@ -47,8 +48,6 @@ public class MainHelper : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        Debug.Log(this.currentGame.Level.ToString());
-
         if (this.currentGame.Level >= MainHelper.CurrentGameSession.CurrentLevels.TotalLevels)
         {
             Time.timeScale = 0;
@@ -96,6 +95,13 @@ public class MainHelper : MonoBehaviour {
         }
 
         if (!this.UserLevelsCoroutine)
+        if (this.LevelFilesExistenceCheckRoutine)
+        {
+            StartCoroutine("LevelFileCheckCoroutine");
+        }
+
+        if (!this.LevelFilesExistenceCheckRoutine)
+        if (!this.UserLevelsCoroutine)
         if (this.CurrentEncryptingLevel < MainHelper.CurrentGameSession.CurrentLevels.TotalLevels)
         if (!this.EncryptionInProcess)
             if (!MainHelper.CurrentGameSession.CurrentLevels[this.CurrentEncryptingLevel].LevelEncrypted)
@@ -116,6 +122,41 @@ public class MainHelper : MonoBehaviour {
         }
 #endif
 	}
+
+    private IEnumerator LevelFileCheckCoroutine()
+    {
+        this.LevelFilesExistenceCheckRoutine = false;
+        Debug.Log("File check coroutine");
+        for (int i = 0; i < MainHelper.CurrentGameSession.CurrentLevels.TotalLevels; i++)
+        {
+            Debug.Log("Index from coroutine " + i.ToString() + "; While total levels: " + MainHelper.CurrentGameSession.CurrentLevels.TotalLevels.ToString() + "; And actual length: " + MainHelper.CurrentGameSession.CurrentLevels.ActualArrayLength.ToString());
+            if (!File.Exists(MainHelper.CurrentGameSession.CurrentLevels[i].LevelPath))
+            {
+                MainHelper.CurrentGameSession.CurrentLevels.RemoveLevel(i);
+                yield return new WaitForSeconds(2.5f);
+
+                try
+                {
+                    MainHelper.CurrentGameSession.WriteXml("", GameXmlTypes.LevelsXml);
+                }
+                catch (Exception e)
+                {
+                    Time.timeScale = 0;
+#if UNITY_EDITOR
+                    Debug.Log("Error writing xml");
+                    Debug.Log(e.Message);
+#else
+                    InterfaceUpdateEventArgs iuea = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, e.Message, e);
+                    EventSystem.FireInterfaceUpdate(this, iuea);
+#endif
+                }
+            }
+        }
+
+        yield return new WaitForSeconds(2.5f);
+
+        StopCoroutine("LevelFileCheckCoroutine");
+    }
 
     private IEnumerator EncryptionCoroutine()
     {

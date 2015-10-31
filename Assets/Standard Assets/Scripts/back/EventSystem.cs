@@ -24,11 +24,15 @@ public class EventSystem : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (this.mhReference.GetCurrentGame().GetCurrentField().TotalBricks == 0)
+        if (GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().GameInProgress)
         {
-            object sender = new object();
-            ChangeLevelEventArgs e = new ChangeLevelEventArgs(this.mhReference.GetCurrentGame().Level, this.mhReference.GetCurrentGame().Level + 1, ChangeLevelReasons.AllBricksDestroyed);
-            EventSystem.FireChangeLevel(sender, e);
+            if (this.mhReference.GetCurrentGame().GetCurrentField().TotalBricks == 1)
+            {
+                Debug.LogWarning("Change level fired");
+                object sender = new object();
+                ChangeLevelEventArgs e = new ChangeLevelEventArgs(this.mhReference.GetCurrentGame().Level, this.mhReference.GetCurrentGame().Level + 1, ChangeLevelReasons.AllBricksDestroyed);
+                EventSystem.FireChangeLevel(sender, e);
+            }
         }
 	}
 
@@ -44,9 +48,19 @@ public class EventSystem : MonoBehaviour {
 
     public static void FireEndGame(object sender, EndGameEventArgs e)
     {
-        if (EventSystem.OnEndGame != null)
+        if (GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().GameInProgress)
         {
-            EventSystem.OnEndGame(sender, e);
+            if (EventSystem.OnEndGame != null)
+            {
+                Debug.LogWarning("End Game fired");
+                foreach (Delegate del in EventSystem.OnEndGame.GetInvocationList())
+                {
+                    Debug.LogWarning(del.Method.Name.ToString());
+                    Debug.LogWarning(del.Target.ToString());
+                }
+
+                EventSystem.OnEndGame(sender, e);
+            }
         }
     }
 

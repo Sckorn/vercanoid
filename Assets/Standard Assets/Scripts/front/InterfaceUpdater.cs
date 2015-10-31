@@ -18,6 +18,9 @@ public class InterfaceUpdater : MonoBehaviour
     public GameObject exceptionTextReference = null;
     public GameObject pauseMenuCanvasReference = null;
     public GameObject endGameCanvasReference = null;
+    public GameObject headerCanvasReference = null;
+    public GameObject menuCanvasReference = null;
+    public GameObject optionsCanvasReference = null;
 
     /*
      
@@ -106,6 +109,11 @@ public class InterfaceUpdater : MonoBehaviour
         mh.GetCurrentGame().ResumeGame();
     }
 
+    public void ToMainMenuClickHandler()
+    {
+        Application.LoadLevel(0);
+    }
+
     protected void ShowPauseMenu(InterfaceUpdateEventArgs e)
     {
         if (e.GamePaused)
@@ -123,6 +131,35 @@ public class InterfaceUpdater : MonoBehaviour
         if (this.endGameCanvasReference != null)
         {
             this.endGameCanvasReference.GetComponent<Canvas>().enabled = true;
+        }
+    }
+
+    public void ShowOptionsCanvas()
+    {
+        try
+        {
+            this.headerCanvasReference.GetComponent<Canvas>().enabled = false;
+            this.menuCanvasReference.GetComponent<Canvas>().enabled = false;
+            this.optionsCanvasReference.GetComponent<Canvas>().enabled = true;
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                GameObject.Find("HeaderCanvas").GetComponent<Canvas>().enabled = false;
+                GameObject.Find("MenuCanvas").GetComponent<Canvas>().enabled = false;
+                GameObject.Find("OptionsCanvas").GetComponent<Canvas>().enabled = true;
+            }
+            catch (Exception ex)
+            {
+#if UNITY_EDITOR
+                Debug.Log("No canvas references");
+                Debug.Log(ex.Message);
+                Debug.Log(e.Message);
+#else
+                /*lil' bit later*/
+#endif
+            }
         }
     }
 }

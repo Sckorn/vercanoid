@@ -12,6 +12,11 @@ public class GameLevels {
         get { return this.totalLevels; }
     }
 
+    public int ActualArrayLength
+    {
+        get { return this.CurrentLevels.Length; }
+    }
+
     public string this[string param]
     {
         get { if (param.Equals("levelFiles")) return this.totalLevels.ToString(); return string.Empty; }
@@ -24,7 +29,18 @@ public class GameLevels {
         {
             if (param > this.CurrentLevels.Length || param < 0) return null;
 
-            return this.CurrentLevels[param];
+            try
+            {
+                return this.CurrentLevels[param];
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Fuck up");
+                Debug.Log(e.Message);
+                Debug.Log(param.ToString());
+                Debug.Log(this.CurrentLevels.Length.ToString());
+                return null;
+            }
         }
 
         set
@@ -53,13 +69,78 @@ public class GameLevels {
         this.CurrentLevels = tmpLev;
         this.totalLevels++;
     }
+
+    public bool RemoveLevel(int levelIndex)
+    {
+        if (levelIndex < 0 || levelIndex > this.CurrentLevels.Length) return false;
+
+        Debug.Log("From remove level, levelIndex: " + levelIndex.ToString());
+        try
+        {
+            this.CurrentLevels[levelIndex].Dispose();
+        }
+        catch (ArgumentOutOfRangeException e)
+        {
+            Debug.Log("Wrong index?");
+            Debug.Log(e.Message);
+        }
+
+        for (int i = levelIndex; i < this.CurrentLevels.Length; i++)
+        {
+            try
+            {
+                this.CurrentLevels[i] = this.CurrentLevels[i + 1];
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                Debug.Log("Index out fo range");
+                Debug.Log(e.Message);
+            }
+        }
+
+        GameLevel[] TmpArr = new GameLevel[this.CurrentLevels.Length - 1];
+        Array.Copy(this.CurrentLevels, 0, TmpArr, 0, TmpArr.Length);
+        //this.CurrentLevels.CopyTo(TmpArr, 0);
+
+        this.CurrentLevels = TmpArr;
+        this.totalLevels--;
+
+        return true;
+    }
 }
 
-public sealed class GameLevel {
+public class GameLevel : IDisposable {
     private int levelNumber = 0;
     private string levelPath;
     private bool levelFileEncrypted;
     private bool userLevelFlag;
+    private bool disposed = false;
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposed)
+            return;
+
+        if (disposing)
+        { 
+            
+        }
+
+        this.levelPath = string.Empty;
+
+        disposed = true;
+    }
+
+    ~GameLevel()
+    {
+        Dispose(false);
+    }
 
     public string this[string param]
     {
