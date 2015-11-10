@@ -21,6 +21,9 @@ public class InterfaceUpdater : MonoBehaviour
     public GameObject headerCanvasReference = null;
     public GameObject menuCanvasReference = null;
     public GameObject optionsCanvasReference = null;
+    public GameObject backgroundToggleReference = null;
+    public GameObject audioToggleReference = null;
+    public GameObject volumeLevelSliderReference = null;
 
     /*
      
@@ -30,11 +33,15 @@ public class InterfaceUpdater : MonoBehaviour
     void Awake()
     {
         EventSystem.OnInterfaceUpdate += this.UpdateInterface;
+        EventSystem.OnInterfaceUpdate += this.UpdateAudioToggle;
+        EventSystem.OnInterfaceUpdate += this.UpdateBackgroundToggle;
+        EventSystem.OnInterfaceUpdate += this.UpdateVolumeSlider;
     }
 
     void Start()
     {
         EventSystem.OnEndGame += this.ShowEndGameMenu;
+        
     }
 
     void Update()
@@ -134,6 +141,122 @@ public class InterfaceUpdater : MonoBehaviour
         }
     }
 
+    protected void UpdateBackgroundToggle(object sender, InterfaceUpdateEventArgs e)
+    {
+        GameObject goSender;
+        try
+        {
+            goSender = (GameObject)sender;
+        }
+        catch (Exception exc)
+        {
+            Debug.Log("Sender is null or of a wrong type");
+            Debug.Log(exc.Message);
+            return;
+        }
+
+        if (e.UpdateReason == InterfaceUpdateReasons.OptionChanged)
+        {
+            if (this.backgroundToggleReference != null)
+            {
+                if (goSender.Equals(this.backgroundToggleReference.gameObject))
+                {
+                    try
+                    {
+                        bool value = (bool)e.TargetValue;
+                        this.backgroundToggleReference.GetComponent<Toggle>().isOn = value;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Log("Can't update interface");
+                        Debug.Log(ex.Message);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    protected void UpdateAudioToggle(object sender, InterfaceUpdateEventArgs e)
+    {
+        GameObject goSender;
+        try
+        {
+            goSender = (GameObject)sender;
+        }
+        catch (Exception exc)
+        {
+            Debug.Log("Sender is null or of a wrong type");
+            Debug.Log(exc.Message);
+            return;
+        }
+
+        Debug.LogWarning(goSender.ToString());
+
+        Debug.Log("Yes?");
+        if (e.UpdateReason == InterfaceUpdateReasons.OptionChanged)
+        {
+            Debug.Log("First if");
+            if (this.audioToggleReference != null)
+            {
+                Debug.Log("Second if");
+                if (goSender.Equals(this.audioToggleReference.gameObject))
+                {
+                    Debug.Log("Third if");
+                    try
+                    {
+                        bool value = (bool)e.TargetValue;
+                        Debug.LogWarning(value.ToString());
+                        this.audioToggleReference.GetComponent<Toggle>().isOn = value;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Log("Can't update interface");
+                        Debug.Log(ex.Message);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    protected void UpdateVolumeSlider(object sender, InterfaceUpdateEventArgs e)
+    {
+        GameObject goSender;
+        try
+        {
+            goSender = (GameObject)sender;
+        }
+        catch (Exception exc)
+        {
+            Debug.Log("Sender is null or of a wrong type");
+            Debug.Log(exc.Message);
+            return;
+        }
+
+        if (e.UpdateReason == InterfaceUpdateReasons.OptionChanged)
+        {
+            if (this.volumeLevelSliderReference != null)
+            {
+                if (goSender.Equals(this.volumeLevelSliderReference.gameObject))
+                {
+                    float tmp;
+                    try
+                    {
+                        tmp = (float)e.TargetValue;
+                        this.volumeLevelSliderReference.GetComponent<Slider>().value = tmp;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Log("Can't update interface");
+                        Debug.Log(ex.Message);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
     public void ShowOptionsCanvas()
     {
         try
@@ -161,5 +284,12 @@ public class InterfaceUpdater : MonoBehaviour
 #endif
             }
         }
+    }
+
+    public static void RemoveMainMenuHandlers(InterfaceUpdater instigator)
+    {
+        EventSystem.OnInterfaceUpdate -= instigator.UpdateAudioToggle;
+        EventSystem.OnInterfaceUpdate -= instigator.UpdateBackgroundToggle;
+        EventSystem.OnInterfaceUpdate -= instigator.UpdateVolumeSlider;
     }
 }

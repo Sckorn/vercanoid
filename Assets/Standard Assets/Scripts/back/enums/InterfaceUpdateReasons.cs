@@ -8,5 +8,6 @@ public enum InterfaceUpdateReasons {
     LevelChanged,
     GameOver,
     GamePaused,
+    OptionChanged,
     UnknownReason
 }

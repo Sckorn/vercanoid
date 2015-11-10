@@ -54,9 +54,9 @@ public class Field {
                 return this.ReadFieldFromFile(levelNum, true);
         }
 #if UNITY_EDITOR
-        string path = @"Assets\Standard Assets\Resources\";
+        string path = @"Assets/Standard Assets/Resources/";
 #else
-        string path = @"Data\Levels\";
+        string path = @"Data/Levels/";
 #endif
 
         try
@@ -112,7 +112,7 @@ public class Field {
             Debug.LogWarning(levelPath);
             this.charTmpgrid = new char[this.sizeX, this.sizeY];
             int i = 0;
-            decryptedFile = path + @"/" + DateTime.Now.GetHashCode().ToString() + @".xml";
+            decryptedFile = path + @"/" + DateTime.Now.GetHashCode().ToString() + @".txt";
 
             LevelFileCrypto.DecryptFile(levelPath, decryptedFile, "");
 
@@ -153,7 +153,8 @@ public class Field {
         {
             try
             {
-                File.Delete(decryptedFile);
+                int i = 0;
+                //File.Delete(decryptedFile);
             }
             catch (Exception ex)
             {

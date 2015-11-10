@@ -40,6 +40,13 @@ public class InterfaceUpdateEventArgs : EventArgs
         get { return this.gamePaused; }
     }
 
+    private object targetValue;
+
+    public object TargetValue
+    {
+        get { return this.targetValue;}
+    }
+
     public InterfaceUpdateEventArgs(InterfaceUpdateReasons updateReason, string updatedValue, Exception thrownException = null)
     {
         this.updateReason = updateReason;
@@ -52,7 +59,14 @@ public class InterfaceUpdateEventArgs : EventArgs
         }
     }
 
-    public InterfaceUpdateEventArgs(InterfaceUpdateReasons updateReason, string updatedValue, bool gamePaused)
+    public InterfaceUpdateEventArgs(InterfaceUpdateReasons updateReason, string updatedValue, object _targetValue)
+    {
+        this.updateReason = updateReason;
+        this.targetValue = _targetValue;
+        this.updatedValue = updatedValue;
+    }
+
+    public InterfaceUpdateEventArgs(InterfaceUpdateReasons updateReason, string updatedValue, object _targetValue, bool gamePaused)
     {
         this.updateReason = updateReason;
         this.updatedValue = updatedValue;

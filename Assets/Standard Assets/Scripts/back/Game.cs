@@ -104,7 +104,7 @@ public class Game{
         Time.timeScale = 0;
         this.gamePaused = true;
         object sender = new object();
-        InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.GamePaused, "", this.GamePaused);
+        InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.GamePaused, "", null, this.GamePaused);
         EventSystem.FireInterfaceUpdate(sender, e);
     }
 
@@ -113,7 +113,7 @@ public class Game{
         Time.timeScale = 1;
         this.gamePaused = false;
         object sender = new object();
-        InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.GamePaused, "", this.GamePaused);
+        InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.GamePaused, "", null, this.GamePaused);
         EventSystem.FireInterfaceUpdate(sender, e);
     }
 

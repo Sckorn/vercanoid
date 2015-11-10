@@ -74,8 +74,10 @@ public class EventSystem : MonoBehaviour {
 
     public static void FireInterfaceUpdate(object sender, InterfaceUpdateEventArgs e)
     {
+        //Debug.LogWarning((GameObject)sender);
         if (EventSystem.OnInterfaceUpdate != null)
         {
+            //Debug.LogWarning((GameObject)sender);
             EventSystem.OnInterfaceUpdate(sender, e);
         }
     }

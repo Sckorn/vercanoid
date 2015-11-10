@@ -75,8 +75,6 @@ public static class LevelFileCrypto {
 
     static public string DecryptFile(string sInputFilePath, string sKey)
     {
-        string result = string.Empty;
-
         if (sKey.Equals(string.Empty)) sKey = LevelFileCrypto.PermanentKey;
 
         DESCryptoServiceProvider DES = new DESCryptoServiceProvider();

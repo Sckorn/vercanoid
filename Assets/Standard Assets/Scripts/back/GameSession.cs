@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.IO;
@@ -10,6 +11,7 @@ public class GameSession {
     private string optionsFilePath = @"Data/Options.xml";
     private string levelsFilePath = @"Data/Levels/Levels.xml";
     public GameLevels CurrentLevels;
+    public Options options;
     private StringBuilder BufferedLevelsXmlContents = null;
 
     public int SessionID
@@ -25,7 +27,24 @@ public class GameSession {
     public GameSession()
     {
         this.sessionID = DateTime.Now.GetHashCode();
+        this.CurrentLevels = new GameLevels();
+        this.options = new Options();
         this.OpenLevelsFile(string.Empty);
+        this.OpenOptionsFile(string.Empty);
+    }
+
+    public GameSession(GameXmlTypes _toOpen)
+    {
+        this.options = new Options();
+        this.sessionID = DateTime.Now.GetHashCode();
+        if (_toOpen == GameXmlTypes.LevelsXml)
+        {
+            this.OpenLevelsFile(string.Empty);
+        }
+        else
+        {
+            this.OpenOptionsFile(string.Empty);
+        }
     }
 
     public void OpenOptionsFile(string _optionsFilePath)
@@ -47,6 +66,7 @@ public class GameSession {
     {
         for (int i = 0; i < this.CurrentLevels.TotalLevels; i++)
         {
+            Debug.Log(i.ToString() + " " + this.CurrentLevels.TotalLevels.ToString() + " " + this.CurrentLevels.ActualArrayLength.ToString());
             if (this.CurrentLevels[i].LevelPath.Equals(path)) return true;
         }
         
@@ -90,7 +110,6 @@ public class GameSession {
 #endif
         }
 
-        this.CurrentLevels = new GameLevels();
         int totalLevelsFromFile = 0;
         int levelsCount = 0;
         StringBuilder output = new StringBuilder();
@@ -111,7 +130,26 @@ public class GameSession {
                                 {
                                     if (fetchType == GameXmlTypes.OptionsXml)
                                     {
-                                        
+                                        writer.WriteStartElement(reader.Name);
+                                        if (reader.Name.Equals("option"))
+                                        {
+                                            if (reader.HasAttributes)
+                                            {
+                                                string name = string.Empty;
+                                                string value = string.Empty;
+                                                while (reader.MoveToNextAttribute())
+                                                {
+                                                    if (reader.Name.Equals("name")) name = reader.Value;
+                                                    if (reader.Name.Equals("value")) value = reader.Value;
+                                                    writer.WriteAttributeString(reader.Name, reader.Value);                                                    
+                                                }
+                                                this.options[name] = value;
+                                                reader.MoveToElement();
+                                                writer.WriteEndElement();
+                                            }
+                                            else
+                                                throw new Exception("Element has no attributes");
+                                        }
                                     }
                                     else if (fetchType == GameXmlTypes.LevelsXml)
                                     {
@@ -153,7 +191,7 @@ public class GameSession {
                             case XmlNodeType.XmlDeclaration: writer.WriteProcessingInstruction(reader.Name, reader.Value); break;
                             case XmlNodeType.EndElement:
                                 {
-                                    if (!reader.Name.Equals("levelFile"))
+                                    if (!reader.Name.Equals("levelFile") && !reader.Name.Equals("option"))
                                         writer.WriteEndElement();
                                 }
                                 break;
@@ -178,7 +216,7 @@ public class GameSession {
         {
             this.BufferedLevelsXmlContents = output;
             Debug.Log(output);
-            Debug.Log(totalLevelsFromFile.ToString() + " " + this.CurrentLevels.TotalLevels.ToString() + " " + this.CurrentLevels.ActualArrayLength.ToString());
+            //Debug.Log(totalLevelsFromFile.ToString() + " " + this.CurrentLevels.TotalLevels.ToString() + " " + this.CurrentLevels.ActualArrayLength.ToString());
             if (File.Exists(resultFile))
             {
                 try
@@ -193,6 +231,13 @@ public class GameSession {
             }
         }
     }
+
+    private void SetOption(string name, string value)
+    { 
+        
+    }
+
+    #region write_xml
 
     public void WriteXml(string xmlFilePath, GameXmlTypes fetchType = GameXmlTypes.OptionsXml)
     {
@@ -260,8 +305,27 @@ public class GameSession {
                 fileNewTemp = targetFolder + @"/" + DateTime.Now.GetHashCode().ToString() + @".xml";
             }
             else
-            { 
-                
+            {
+                Type myType = typeof(Options);
+                FieldInfo[] fi = myType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+                ResultString.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
+                ResultString.AppendLine("<options>");
+                foreach (FieldInfo f in fi)
+                {
+                    ResultString.AppendLine("<option name=\"" + f.Name +"\" value=\"" + f.GetValue(this.options).ToString() + "\" />");   
+                }
+                ResultString.AppendLine("</options>");
+
+                if (ResultString.ToString().Equals(string.Empty)) throw new Exception("No result string.");
+
+                byte[] resultBytes = ASCIIEncoding.ASCII.GetBytes(ResultString.ToString());
+                FileStream fs = new FileStream(tempFile, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+
+                if (fs == null) throw new Exception("Error creating file");
+                fs.Close();
+                File.WriteAllBytes(tempFile, resultBytes);
+
+                fileNewTemp = targetFolder + @"/" + DateTime.Now.GetHashCode().ToString() + @".xml";
             }
 
             LevelFileCrypto.EncryptFile(tempFile, fileNewTemp, "");
@@ -288,17 +352,17 @@ public class GameSession {
                 File.Delete(tempFile);
                 File.Delete(fileNewTemp);
             }
-            catch (Exception ev)
+            catch (Exception ex)
             {
 #if UNITY_EDITOR
                 Debug.Log("Second nested try? Seriously?");
-                Debug.Log(ev.Message);
+                Debug.Log(ex.Message);
 #else
-                InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't create directory", e);
+                InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't create directory", ex);
                 EventSystem.FireInterfaceUpdate(new object(), ev);
-                return;
 #endif
             }
         }
     }
+    #endregion
 }

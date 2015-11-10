@@ -41,8 +41,9 @@ public class GridCell {
             Debug.LogError(e.Message);
             return;
 #else
-            //do later: handle exceptions to the main menu with a popup informing of the exception
-            Application.Quit();
+            InterfaceUpdateEventArgs iuea = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, e.Message, e);
+            EventSystem.FireInterfaceUpdate(this, iuea);
+            return;
 #endif
         }
         finally

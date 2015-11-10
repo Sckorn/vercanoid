@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#define DEVELOPMENT_BUILD
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -113,7 +114,7 @@ public class MainHelper : MonoBehaviour {
                 this.CurrentEncryptingLevel++;
             }
 
-#if UNITY_EDITOR //debug level switching
+#if DEVELOPMENT_BUILD //debug level switching
         if (Input.GetKeyUp(KeyCode.E))
         {
             object sender = new object();
@@ -121,7 +122,7 @@ public class MainHelper : MonoBehaviour {
             EventSystem.FireChangeLevel(sender, e);
         }
 #endif
-	}
+    }
 
     private IEnumerator LevelFileCheckCoroutine()
     {
@@ -184,7 +185,8 @@ public class MainHelper : MonoBehaviour {
             Debug.Log("Error encrypting file");
             Debug.Log(e.Message);
 #else
-            /*do a little later*/
+            Debug.Log("Error encrypting file");
+            Debug.Log(e.Message);
 #endif
         }
 
@@ -201,7 +203,8 @@ public class MainHelper : MonoBehaviour {
             Debug.Log("Error encrypting file");
             Debug.Log(e.Message);
 #else
-            /*do a little later*/
+            Debug.Log("Error encrypting file");
+            Debug.Log(e.Message);
 #endif
         }
         finally
