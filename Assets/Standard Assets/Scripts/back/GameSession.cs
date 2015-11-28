@@ -30,7 +30,7 @@ public class GameSession {
         this.CurrentLevels = new GameLevels();
         this.options = new Options();
         this.OpenLevelsFile(string.Empty);
-        this.OpenOptionsFile(string.Empty);
+        //this.OpenOptionsFile(string.Empty);
     }
 
     public GameSession(GameXmlTypes _toOpen)
@@ -43,7 +43,8 @@ public class GameSession {
         }
         else
         {
-            this.OpenOptionsFile(string.Empty);
+            Logger.WriteToLog("Opening options");
+            //this.OpenOptionsFile(string.Empty);
         }
     }
 
@@ -52,7 +53,7 @@ public class GameSession {
         if (_optionsFilePath.Equals(string.Empty)) _optionsFilePath = this.optionsFilePath;
 
         this.GetXml(_optionsFilePath, GameXmlTypes.OptionsXml);
-
+        Logger.WriteToLog("UserAudio " + this.options.UserAudioEnabled.ToString() + " User BG " + this.options.UserBackgroundsEnabled.ToString() + " Volume level " + this.options.VolumeLevel.ToString());
     }
 
     public void OpenLevelsFile(string _levelsFilePath)
@@ -66,7 +67,6 @@ public class GameSession {
     {
         for (int i = 0; i < this.CurrentLevels.TotalLevels; i++)
         {
-            Debug.Log(i.ToString() + " " + this.CurrentLevels.TotalLevels.ToString() + " " + this.CurrentLevels.ActualArrayLength.ToString());
             if (this.CurrentLevels[i].LevelPath.Equals(path)) return true;
         }
         
@@ -75,6 +75,7 @@ public class GameSession {
 
     public void GetXml(string xmlFilePath, GameXmlTypes fetchType = GameXmlTypes.OptionsXml)
     {
+        Logger.WriteToLog("Trying to fetch options from file; " + fetchType.ToString());
         if (fetchType == GameXmlTypes.LevelsXml)
         {
             if(xmlFilePath.Equals(string.Empty)) xmlFilePath = this.levelsFilePath;
@@ -90,6 +91,7 @@ public class GameSession {
         string targetPath = @"Data/Temp";
 #endif
 
+        Logger.WriteToLog("XmlFilePath " + xmlFilePath);
         string resultFile = string.Empty;
         try
         {
@@ -104,18 +106,20 @@ public class GameSession {
             Debug.Log(e.Message);
             return;
 #else
+            Logger.WriteToLog("Can't create temp folder " + e.Message);
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't create directory", e);
             EventSystem.FireInterfaceUpdate(new object(), ev);
             return;
 #endif
         }
-
+        Logger.WriteToLog("XmlFilePath " + resultFile);
         int totalLevelsFromFile = 0;
         int levelsCount = 0;
         StringBuilder output = new StringBuilder();
         try
         {
-            using (XmlReader reader = XmlReader.Create(File.Open(resultFile, FileMode.Open, FileAccess.Read, FileShare.Delete)))
+            FileStream fs = File.Open(resultFile, FileMode.Open, FileAccess.Read, FileShare.Delete);
+            using (XmlReader reader = XmlReader.Create(fs))
             {
                 XmlWriterSettings ws = new XmlWriterSettings();
                 ws.Indent = true;
@@ -130,15 +134,18 @@ public class GameSession {
                                 {
                                     if (fetchType == GameXmlTypes.OptionsXml)
                                     {
+                                        Logger.WriteToLog("Fetching options");
                                         writer.WriteStartElement(reader.Name);
                                         if (reader.Name.Equals("option"))
                                         {
                                             if (reader.HasAttributes)
                                             {
+                                                Logger.WriteToLog("Reading options attributes");
                                                 string name = string.Empty;
                                                 string value = string.Empty;
                                                 while (reader.MoveToNextAttribute())
                                                 {
+                                                    Logger.WriteToLog("Attrib " + reader.Name + " " + reader.Value);
                                                     if (reader.Name.Equals("name")) name = reader.Value;
                                                     if (reader.Name.Equals("value")) value = reader.Value;
                                                     writer.WriteAttributeString(reader.Name, reader.Value);                                                    
@@ -154,7 +161,6 @@ public class GameSession {
                                     else if (fetchType == GameXmlTypes.LevelsXml)
                                     {
                                         writer.WriteStartElement(reader.Name);
-                                        Debug.Log(reader.Name);
                                         if (reader.Name.Equals("levelFiles"))
                                         {
                                             if (reader.HasAttributes)
@@ -173,7 +179,6 @@ public class GameSession {
                                             {
                                                 while (reader.MoveToNextAttribute())
                                                 {
-                                                    Debug.Log(reader.Name + " " + reader.Value.ToString());
                                                     gl[reader.Name] = reader.Value.ToString();
                                                     writer.WriteAttributeString(reader.Name, reader.Value);
                                                 }
@@ -199,6 +204,8 @@ public class GameSession {
                     }
                 }
             }
+            fs.Close();
+            fs.Dispose();
         }
         catch (Exception e)
         {
@@ -207,6 +214,7 @@ public class GameSession {
             Debug.Log(e.Message);
             return;
 #else
+            Logger.WriteToLog("Problem reading xml! " + e.Message);
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't open levels xml", e);
             EventSystem.FireInterfaceUpdate("fuck", ev);
             return;
@@ -215,7 +223,6 @@ public class GameSession {
         finally
         {
             this.BufferedLevelsXmlContents = output;
-            Debug.Log(output);
             //Debug.Log(totalLevelsFromFile.ToString() + " " + this.CurrentLevels.TotalLevels.ToString() + " " + this.CurrentLevels.ActualArrayLength.ToString());
             if (File.Exists(resultFile))
             {
@@ -241,6 +248,7 @@ public class GameSession {
 
     public void WriteXml(string xmlFilePath, GameXmlTypes fetchType = GameXmlTypes.OptionsXml)
     {
+        Logger.WriteToLog("Writing to xml");
         if (fetchType == GameXmlTypes.LevelsXml)
         {
             if (xmlFilePath.Equals(string.Empty)) xmlFilePath = this.levelsFilePath;
@@ -259,7 +267,7 @@ public class GameSession {
 #endif
 
         string tempFile = string.Empty;
-        
+        Logger.WriteToLog("Target option file " + xmlFilePath);
         try
         {
             if (!Directory.Exists(targetFolder)) Directory.CreateDirectory(targetFolder);
@@ -272,6 +280,7 @@ public class GameSession {
             Debug.Log(e.Message);
             return;
 #else
+            Logger.WriteToLog("Can't create temp folder " + e.Message);
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't create directory", e);
             EventSystem.FireInterfaceUpdate(new object(), ev);
             return;
@@ -312,6 +321,7 @@ public class GameSession {
                 ResultString.AppendLine("<options>");
                 foreach (FieldInfo f in fi)
                 {
+                    Logger.WriteToLog("<option name=\"" + f.Name + "\" value=\"" + f.GetValue(this.options).ToString() + "\" />");
                     ResultString.AppendLine("<option name=\"" + f.Name +"\" value=\"" + f.GetValue(this.options).ToString() + "\" />");   
                 }
                 ResultString.AppendLine("</options>");
@@ -323,15 +333,18 @@ public class GameSession {
 
                 if (fs == null) throw new Exception("Error creating file");
                 fs.Close();
+                
                 File.WriteAllBytes(tempFile, resultBytes);
-
+                Logger.WriteToLog("Temp file phase passed?");
                 fileNewTemp = targetFolder + @"/" + DateTime.Now.GetHashCode().ToString() + @".xml";
             }
 
             LevelFileCrypto.EncryptFile(tempFile, fileNewTemp, "");
-
+            Logger.WriteToLog("Target path " + targetPath);
             byte[] encryptedBytes = File.ReadAllBytes(fileNewTemp);
+            File.Delete(targetPath);
             File.WriteAllBytes(targetPath, encryptedBytes);
+            Logger.WriteToLog("All bytes written");
         }
         catch (Exception e)
         {
@@ -340,6 +353,7 @@ public class GameSession {
             Debug.Log(e.Message);
             return;
 #else
+            Logger.WriteToLog("Can't write bytes to file " + e.Message);
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't create directory", e);
             EventSystem.FireInterfaceUpdate(new object(), ev);
             return;
@@ -358,6 +372,7 @@ public class GameSession {
                 Debug.Log("Second nested try? Seriously?");
                 Debug.Log(ex.Message);
 #else
+                Logger.WriteToLog("Second nested try? Seriously? " + ex.Message);
                 InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Can't create directory", ex);
                 EventSystem.FireInterfaceUpdate(new object(), ev);
 #endif

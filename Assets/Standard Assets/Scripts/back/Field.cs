@@ -48,6 +48,8 @@ public class Field {
 
     private bool ReadFieldFromFile(int levelNum = 0)
     {
+        Logger.WriteToLog("Initial level num " + levelNum.ToString());
+
         if (MainHelper.CurrentGameSession != null)
         {
             if(MainHelper.CurrentGameSession.CurrentLevels[levelNum] != null)
@@ -59,11 +61,29 @@ public class Field {
         string path = @"Data/Levels/";
 #endif
 
+#if UNITY_EDITOR
+        string tempPath = @"Temp";
+#else
+        string tempPath = @"Data/Temp";
+#endif
+
+        Logger.WriteToLog("Still here for file number " + levelNum.ToString());
+        string decryptedPath = string.Empty;
         try
         {
             this.charTmpgrid = new char[this.sizeX, this.sizeY];
             int i = 0;
-            using (StreamReader sr = new StreamReader(path + @"Level" + levelNum.ToString() + ".txt"))
+
+#if UNITY_EDITOR
+            string finalPath = path + @"level" + levelNum.ToString() + ".txt";
+#else
+            string finalPath = path + @"level" + levelNum.ToString() + ".txt";
+            decryptedPath = tempPath + @"/" + DateTime.Now.GetHashCode().ToString() + ".txt";
+            LevelFileCrypto.DecryptFile(finalPath, decryptedPath, "");
+            finalPath = decryptedPath;
+#endif
+
+            using (StreamReader sr = new StreamReader(finalPath))
             {
                 while (sr.Peek() >= 0)
                 {
@@ -96,34 +116,54 @@ public class Field {
             return false;
 #endif
         }
+        finally
+        {
+            try
+            {
+                File.Delete(decryptedPath);
+            }
+            catch (Exception ex)
+            { 
+#if UNITY_EDITOR
+                Debug.Log("Can't delete decrypted file!");
+                Debug.Log(ex.Message);                
+#else
+                Logger.WriteToLog("Can't delete decrypted file! " + ex.Message);
+#endif
+            }
+        }
     }
 
     private bool ReadFieldFromFile(int levelNum, bool bGameSessionFlag)
     {
+        Debug.Log("Dafuq it's here?");
+        Logger.WriteToLog("Reading level from file number " + levelNum.ToString());
 #if UNITY_EDITOR
         string path = @"Temp";
 #else
         string path = @"Data/Temp";
 #endif       
+        Logger.WriteToLog("From folder " + path);
         string decryptedFile = string.Empty;
         try
         {
             string levelPath = MainHelper.CurrentGameSession.CurrentLevels[levelNum].LevelPath;
-            Debug.LogWarning(levelPath);
+            Logger.WriteToLog(levelPath);
             this.charTmpgrid = new char[this.sizeX, this.sizeY];
             int i = 0;
             decryptedFile = path + @"/" + DateTime.Now.GetHashCode().ToString() + @".txt";
 
             LevelFileCrypto.DecryptFile(levelPath, decryptedFile, "");
-
+            
             using (StreamReader sr = new StreamReader(decryptedFile))
             {
-                while (sr.Peek() >= 0)
+                while (!sr.EndOfStream) //(sr.Peek() >= 0) 
                 {
                     string line = sr.ReadLine();
                     int k = 0;
                     for (int j = 0; j < line.Length; j++)
                     {
+                        Logger.WriteToLog(line[j].ToString());
                         if (line[j] == '_' || line[j] == 'x')
                         {
                             this.charTmpgrid[k, i] = line[j];
@@ -154,7 +194,7 @@ public class Field {
             try
             {
                 int i = 0;
-                //File.Delete(decryptedFile);
+                File.Delete(decryptedFile);
             }
             catch (Exception ex)
             {
@@ -234,25 +274,35 @@ public class Field {
         finally
         {
             --this.totalBricks;
-            Debug.LogWarning(this.totalBricks.ToString());
         }
+    }
+
+    public void ReInit()
+    {
+        Array.Clear(this.charTmpgrid, 0, this.charTmpgrid.Length);
+        Array.Clear(this.grid, 0, this.grid.Length);
+        this.totalBricks = 1;
     }
 
     public void DestroyAllBricks()
     {
         Time.timeScale = 0;
-
+        Debug.Log("Deleting dem bricks");
         for (int i = 0; i < this.sizeX; i++)
         {
             for (int j = 0; j < this.sizeY; j++)
             {
                 if (this.grid[i, j].HasBrick)
                 {
+                    //Debug.Log("Has brick");
+                    //Debug.Log(this.grid[i, j].ObjectReference);
+                    //this.grid[i, j].ObjectReference.renderer.material.color = Color.black;
+                    //this.grid[i, j].ObjectReference.transform.position = new Vector3(this.grid[i, j].ObjectReference.transform.position.x, 20.0f, this.grid[i, j].ObjectReference.transform.position.z);
                     GameObject.Find("Morpher").GetComponent<Morpher>().DestroyBrick(this.grid[i, j].ObjectReference);
                 }
             }
         }
-
+        
         Time.timeScale = 1;
     }
 }

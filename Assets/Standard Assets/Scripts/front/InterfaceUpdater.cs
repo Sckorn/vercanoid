@@ -13,7 +13,7 @@ public class InterfaceUpdater : MonoBehaviour
     public GameObject firstPlayerScore = null;
     public GameObject secondPlayerScore = null;
     public GameObjectArrayLayout firstPlayerBalls;
-    public GameObject[] secondPlayerBalls = null;
+    public GameObjectArrayLayout secondPlayerBalls;
     public GameObject exceptionCanvasReference = null;
     public GameObject exceptionTextReference = null;
     public GameObject pauseMenuCanvasReference = null;
@@ -32,21 +32,39 @@ public class InterfaceUpdater : MonoBehaviour
      */
     void Awake()
     {
+        //Debug.LogError("Interface Updater awakes");
         EventSystem.OnInterfaceUpdate += this.UpdateInterface;
         EventSystem.OnInterfaceUpdate += this.UpdateAudioToggle;
         EventSystem.OnInterfaceUpdate += this.UpdateBackgroundToggle;
-        EventSystem.OnInterfaceUpdate += this.UpdateVolumeSlider;
+        if (this.volumeLevelSliderReference != null)
+        {
+            EventSystem.OnInterfaceUpdate += this.UpdateVolumeSlider;
+        }
+        //Debug.Log(Globals.options.UserAudioEnabled.ToString() + " " + Globals.options.UserBackgroundsEnabled.ToString() + " " + Globals.options.VolumeLevel.ToString());
     }
 
     void Start()
     {
         EventSystem.OnEndGame += this.ShowEndGameMenu;
-        
+        /*EventSystem.OnInterfaceUpdate += this.UpdateInterface;
+        EventSystem.OnInterfaceUpdate += this.UpdateAudioToggle;
+        EventSystem.OnInterfaceUpdate += this.UpdateBackgroundToggle;
+        EventSystem.OnInterfaceUpdate += this.UpdateVolumeSlider;        */
+        //this.volumeLevelSliderReference = GameObject.Find("VolumeSlider");
     }
 
     void Update()
     {
 
+    }
+
+    void OnDestroy()
+    {
+        EventSystem.OnInterfaceUpdate -= this.UpdateInterface;
+        EventSystem.OnInterfaceUpdate -= this.UpdateAudioToggle;
+        EventSystem.OnInterfaceUpdate -= this.UpdateBackgroundToggle;
+        EventSystem.OnInterfaceUpdate -= this.UpdateVolumeSlider;
+        EventSystem.OnEndGame -= this.ShowEndGameMenu;
     }
 
     protected void UpdateInterface(object sender, InterfaceUpdateEventArgs e)
@@ -118,6 +136,7 @@ public class InterfaceUpdater : MonoBehaviour
 
     public void ToMainMenuClickHandler()
     {
+        EventSystem.FlushEvents();
         Application.LoadLevel(0);
     }
 
@@ -152,6 +171,7 @@ public class InterfaceUpdater : MonoBehaviour
         {
             Debug.Log("Sender is null or of a wrong type");
             Debug.Log(exc.Message);
+            //EventSystem.OnInterfaceUpdate -= this.UpdateBackgroundToggle;
             return;
         }
 
@@ -188,25 +208,19 @@ public class InterfaceUpdater : MonoBehaviour
         {
             Debug.Log("Sender is null or of a wrong type");
             Debug.Log(exc.Message);
+            //EventSystem.OnInterfaceUpdate -= this.UpdateAudioToggle;
             return;
         }
-
-        Debug.LogWarning(goSender.ToString());
-
-        Debug.Log("Yes?");
+        //Debug.Log(goSender.ToString());
         if (e.UpdateReason == InterfaceUpdateReasons.OptionChanged)
         {
-            Debug.Log("First if");
             if (this.audioToggleReference != null)
             {
-                Debug.Log("Second if");
                 if (goSender.Equals(this.audioToggleReference.gameObject))
                 {
-                    Debug.Log("Third if");
                     try
                     {
                         bool value = (bool)e.TargetValue;
-                        Debug.LogWarning(value.ToString());
                         this.audioToggleReference.GetComponent<Toggle>().isOn = value;
                     }
                     catch (Exception ex)
@@ -222,6 +236,7 @@ public class InterfaceUpdater : MonoBehaviour
 
     protected void UpdateVolumeSlider(object sender, InterfaceUpdateEventArgs e)
     {
+        Debug.Log("Updating volume");
         GameObject goSender;
         try
         {
@@ -231,15 +246,24 @@ public class InterfaceUpdater : MonoBehaviour
         {
             Debug.Log("Sender is null or of a wrong type");
             Debug.Log(exc.Message);
+            //EventSystem.OnInterfaceUpdate -= this.UpdateVolumeSlider;
             return;
         }
 
         if (e.UpdateReason == InterfaceUpdateReasons.OptionChanged)
         {
+            Debug.LogError("Option changed");
             if (this.volumeLevelSliderReference != null)
             {
+                Debug.LogError("Slider reference?");
+                Debug.LogError("GameObject " + (this.volumeLevelSliderReference.gameObject == null).ToString());
+                Debug.LogError("goSender " + (goSender == null).ToString());
+                Debug.LogError("Equality between them " + (goSender == this.volumeLevelSliderReference.gameObject).ToString());
+                Debug.LogError("Built in reference " + this.volumeLevelSliderReference.ToString());
+                Debug.LogError("Sender reference " + goSender.ToString());
                 if (goSender.Equals(this.volumeLevelSliderReference.gameObject))
                 {
+                    Debug.LogError("Equals?");
                     float tmp;
                     try
                     {
@@ -280,7 +304,7 @@ public class InterfaceUpdater : MonoBehaviour
                 Debug.Log(ex.Message);
                 Debug.Log(e.Message);
 #else
-                /*lil' bit later*/
+                Logger.WriteToLog("No canvas references. " + e.Message + "; " + ex.Message + "\t At line " + Logger.GetExceptionsLineNumber(e).ToString() + "\t And at line: " + Logger.GetExceptionsLineNumber(ex).ToString(), this);
 #endif
             }
         }
@@ -291,5 +315,31 @@ public class InterfaceUpdater : MonoBehaviour
         EventSystem.OnInterfaceUpdate -= instigator.UpdateAudioToggle;
         EventSystem.OnInterfaceUpdate -= instigator.UpdateBackgroundToggle;
         EventSystem.OnInterfaceUpdate -= instigator.UpdateVolumeSlider;
+        EventSystem.OnInterfaceUpdate -= instigator.UpdateInterface;
+    }
+
+    public void ChangeColorsByTagsHotseat()
+    {
+        GameObject[] firstPlayerUiElements = GameObject.FindGameObjectsWithTag("FirstPlayerUI");
+        Debug.Log(firstPlayerUiElements.Length.ToString());
+        foreach (GameObject go in firstPlayerUiElements)
+        {
+            if(go.GetComponent<Text>() != null)
+                go.GetComponent<Text>().color = Color.red;
+
+            if (go.GetComponent<Image>() != null)
+                go.GetComponent<Image>().color = Color.red;            
+        }
+
+        GameObject[] secondPlayerUiElements = GameObject.FindGameObjectsWithTag("SecondPlayerUI");
+
+        foreach (GameObject go in secondPlayerUiElements)
+        {
+            if (go.GetComponent<Text>() != null)
+                go.GetComponent<Text>().color = Color.blue;
+
+            if (go.GetComponent<Image>() != null)
+                go.GetComponent<Image>().color = Color.blue;
+        }
     }
 }

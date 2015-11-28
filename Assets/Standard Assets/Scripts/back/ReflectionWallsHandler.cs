@@ -22,6 +22,8 @@ public class ReflectionWallsHandler : MonoBehaviour
         {
             if(this.gameObject.tag == "wall")
                 GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], false, Vector3.right);
+            else if (this.gameObject.tag == "frontWall")
+                GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], false, Vector3.back);
             else
                 GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], false);
         }

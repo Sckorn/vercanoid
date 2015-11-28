@@ -25,9 +25,10 @@ public class GridCell {
         this.hasBrick = _hasBrick;
         
         Morpher morph = GameObject.Find("Morpher").GetComponent<Morpher>();
-
+        if (morph == null) Debug.LogError("no morph");
         try
         {
+
             if (this.hasBrick)
                 this.realObjRef = morph.MorphBrick(this.cellCoords.x, this.cellCoords.y, brickTypeChar);
         }

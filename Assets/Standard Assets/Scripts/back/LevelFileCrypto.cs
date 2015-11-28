@@ -22,7 +22,7 @@ public static class LevelFileCrypto {
     static public string GenerateSessionCryptoKey()
     {
         DESCryptoServiceProvider desCrypto = (DESCryptoServiceProvider)DESCryptoServiceProvider.Create();
-        //Debug.LogWarning(ASCIIEncoding.ASCII.GetString(desCrypto.Key));
+
         return ASCIIEncoding.ASCII.GetString(desCrypto.Key);
     }
 
@@ -40,7 +40,7 @@ public static class LevelFileCrypto {
         ICryptoTransform desencrypt = DES.CreateEncryptor();
         CryptoStream cryptoStream = new CryptoStream(fsEncrypted, desencrypt, CryptoStreamMode.Write);
 
-        byte[] byteArrayInput = new byte[fsInput.Length - 1];
+        byte[] byteArrayInput = new byte[fsInput.Length]; //- 1]; // remove minus one
         fsInput.Read(byteArrayInput, 0, byteArrayInput.Length);
         cryptoStream.Write(byteArrayInput, 0, byteArrayInput.Length);
 

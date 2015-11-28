@@ -6,7 +6,12 @@ public class PlayerScoreInterface : MonoBehaviour {
     private MainHelper mainHelperReference;
 	// Use this for initialization
 	void Start () {
-        this.mainHelperReference = GameObject.Find("MainHelper").GetComponent<MainHelper>();
+        if (Globals.CurrentGameMode == GameModes.SinglePlayer)
+        {
+            Debug.Log("Single player ?");
+            Debug.Log(Globals.CurrentGameMode.ToString());
+            this.mainHelperReference = GameObject.Find("MainHelper").GetComponent<MainHelper>();
+        }
 	}
 	
 	// Update is called once per frame

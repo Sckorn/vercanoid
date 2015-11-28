@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine.UI;
 
 public class MainHelper : MonoBehaviour {
     private Game currentGame;
@@ -24,27 +25,56 @@ public class MainHelper : MonoBehaviour {
 
     void Awake()
     {
-        this.currentGame = new Game();
+        Logger.WriteToLog("Main Scene Awake()");        
     }
 	
     // Use this for initialization
-	void Start () {
+    void OnEnable()
+    {
+
+    }
+    
+    void Start () {
+        if (Globals.options == null)
+        {
+            Globals.InitializeOptions();
+        }
+        GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = Globals.options.VolumeLevel;
+        InterfaceUpdateEventArgs iuea = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.VolumeLevel);
+        EventSystem.FireInterfaceUpdate( GameObject.Find("VolumeSlider"), iuea);
+
+        this.currentGame = new Game();
+        
         this.clips = new List<AudioClip>();
         this.mainAudioSource = GameObject.Find("Main Camera").GetComponent<AudioSource>();
         this.startingBallPosition = GameObject.Find("Ball").transform;
         MainHelper.CurrentGameSession = new GameSession();
 
+        Logger.WriteToLog("Levels array length " + MainHelper.CurrentGameSession.CurrentLevels.ActualArrayLength.ToString());
+        Logger.WriteToLog("Total levels " + MainHelper.CurrentGameSession.CurrentLevels.TotalLevels.ToString());
+        Logger.WriteToLog("Level 0 path " + MainHelper.CurrentGameSession.CurrentLevels[0].LevelPath);
         StartCoroutine("UserLevelsAddition");
 
-#if UNITY_EDITOR
         //this.BgLoader();
-        this.BgAudioLoader();
-        this.UserBgLoader();
+        if (Globals.options.UserAudioEnabled)
+        {
+            this.UserBgAudioLoader();
+        }
+        else
+        {
+            this.BgAudioLoader();
+        }
+
+        if (Globals.options.UserBackgroundsEnabled)
+        {
+            this.UserBgLoader();
+        }
+        else
+        {
+            this.BgLoader();
+        }
+        //this.BgAudioLoader();
         //this.UserBgAudioLoader();
-#else
-        this.UserBgLoader();
-        this.BgAudioLoader();
-#endif
     }
 	
 	// Update is called once per frame
@@ -232,7 +262,6 @@ public class MainHelper : MonoBehaviour {
     private IEnumerator UserLevelsAddition()
     {
         this.UserLevelsCoroutine = true;
-        Debug.Log("User levels coroutine");
         string userPath = @"UserData/Levels";
 
         if (!Directory.Exists(userPath)) { StopCoroutine("UserLevelsAddition"); this.UserLevelsCoroutine = false; }
@@ -551,11 +580,24 @@ public class MainHelper : MonoBehaviour {
 
     public void ToMainMenu()
     {
+        //this.currentGame.GetCurrentField().ReInit();
+        this.currentGame.RemoveDelegates();
+        this.currentGame.GetHumanPlayer().RemoveDelegates();
+        EventSystem.FlushEvents();
         Application.LoadLevel(0);
     }
 
     public void Retry()
     {
         Application.LoadLevel(1);
+    }
+
+    public void HandleVolumeSlider()
+    {
+        float volume = GameObject.Find("VolumeSlider").GetComponent<Slider>().value;
+        Debug.Log("Volume now is " + volume.ToString());
+        Globals.options.VolumeLevel = volume;
+        Debug.Log("Volume in globals " + Globals.options.VolumeLevel.ToString());
+        GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = volume;
     }
 }

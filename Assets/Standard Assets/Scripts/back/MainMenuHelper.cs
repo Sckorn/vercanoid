@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#define DEBUG_BUILD
+using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Reflection;
@@ -8,21 +9,34 @@ using SimpleFileCrypter;
 
 public class MainMenuHelper : MonoBehaviour {
     private string optionsFilePath = @"Data/Options.ini";
-    private Options options = new Options();
+    private Options options;
     private GameSession optionsOnlySession;
 
     /*[System.Runtime.InteropServices.DllImport(@"SimpleFileCrypter.dll")]
     static public extern void EncryptFileFromString(string sInputString, string sOutputFilePath, string sKey);*/
 
+    void Awake()
+    {
+        if(Globals.options == null)
+            Globals.InitializeOptions();
+
+#if DEBUG_BUILD
+        if (!Logger.logExists)
+        {
+            Logger.CreateLogFile();
+            Logger.WriteToLog("Game started");
+            Logger.WriteToLog("Main Menu Scene loaded");
+        }
+#endif
+    }
+
 	// Use this for initialization
 	void Start () {
-        //MainMenuHelper.OpenOptionsFile(this);
+        //this.optionsOnlySession = new GameSession(GameXmlTypes.OptionsXml);
         this.ResizeHeader();
-        this.OpenOptionsFile();
-        //MainMenuHelper.EncryptFileFromString("fuck you twice", @"Temp/dafuq.txt", "");
-        LevelFileCrypto.DecryptFile(@"1.xml", "Temp/1.xml", "");
-        //Logger.CreateLogFile();
-        Logger.RemoveAllExistingLogs();
+        //this.OpenOptionsFile();
+        Debug.Log("Volume level " + Globals.options.VolumeLevel.ToString());
+        StartCoroutine("OptionsInterfaceUpdateRoutine");
 	}
 	
 	// Update is called once per frame
@@ -33,7 +47,6 @@ public class MainMenuHelper : MonoBehaviour {
     public void ResizeHeader()
     {
         RectTransform rt = GameObject.Find("HeaderPanel").GetComponentInChildren<RectTransform>();
-        //Debug.Log(rt.sizeDelta.x.ToString() + " " + rt.sizeDelta.y.ToString());
         float quarterOfHeight = Screen.height / 4;
         rt.sizeDelta = new Vector2(Screen.width, quarterOfHeight);
     }
@@ -42,7 +55,10 @@ public class MainMenuHelper : MonoBehaviour {
     {
         try
         {
-            this.optionsOnlySession.WriteXml(@"Data/Options.xml", GameXmlTypes.OptionsXml);
+            EventSystem.FlushEvents();
+            Logger.WriteToLog("trying to start single player");
+            //this.optionsOnlySession.WriteXml(@"", GameXmlTypes.OptionsXml);
+           // Logger.WriteToLog("User Aduio " + this.optionsOnlySession.options.UserAudioEnabled.ToString() + "User Bg " + this.optionsOnlySession.options.UserBackgroundsEnabled.ToString() + " Volume Level " + this.optionsOnlySession.options.VolumeLevel.ToString(), this);
             InterfaceUpdater.RemoveMainMenuHandlers(GameObject.Find("InterfaceUpdater").GetComponent<InterfaceUpdater>());
             Application.LoadLevel(1);
         }
@@ -53,6 +69,7 @@ public class MainMenuHelper : MonoBehaviour {
             Debug.Log(e.Message);
             return;
 #else
+            Logger.WriteToLog("Can't start single player. Reason: " + e.Message + "\t At line " + Logger.GetExceptionsLineNumber(e), this);
             Application.Quit();
 #endif
         }
@@ -60,75 +77,66 @@ public class MainMenuHelper : MonoBehaviour {
 
     public void QuitGame()
     {
+        Globals.WriteAndCloseOptions();
+        Logger.CloseLogFileHandle();
         Application.Quit();
     }
 
     public IEnumerator OptionsInterfaceUpdateRoutine()
     {
-        Debug.Log("Coroutine");
         InterfaceUpdateEventArgs e;
         object sender;
+        Debug.Log("Coroutine started");
 
-        /*e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", this.options.UserAudioEnabled);
-
+        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.UserAudioEnabled);//this.optionsOnlySession.options.UserAudioEnabled);
+        
         EventSystem.FireInterfaceUpdate(GameObject.Find("AudioToggle"), e);
+        //GameObject.Find("AudioToggle").GetComponent<Toggle>().isOn = Globals.options.UserAudioEnabled;
 
-        yield return new WaitForSeconds(0.2f);
+        //yield return new WaitForSeconds(0.2f);
 
-        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "",  this.options.UserBackgroundsEnabled);
+        Debug.Log("After first yield");
+        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.UserBackgroundsEnabled); //this.optionsOnlySession.options.UserBackgroundsEnabled);
 
         EventSystem.FireInterfaceUpdate(GameObject.Find("BackgroundToggle"), e);
+        //GameObject.Find("BackgroundToggle").GetComponent<Toggle>().isOn = Globals.options.UserBackgroundsEnabled;
 
-        yield return new WaitForSeconds(0.2f);
 
-        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", this.options.VolumeLevel);
+        //yield return new WaitForSeconds(0.2f);
+        Debug.Log("After second yield");
+        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.VolumeLevel); //this.optionsOnlySession.options.VolumeLevel);
         sender = GameObject.Find("VolumeSlider");
-        GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = this.options.VolumeLevel;
 
-        EventSystem.FireInterfaceUpdate(sender, e);*/
-
-        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", this.optionsOnlySession.options.UserAudioEnabled);
-
-        EventSystem.FireInterfaceUpdate(GameObject.Find("AudioToggle"), e);
-
-        yield return new WaitForSeconds(0.2f);
-
-        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", this.optionsOnlySession.options.UserBackgroundsEnabled);
-
-        EventSystem.FireInterfaceUpdate(GameObject.Find("BackgroundToggle"), e);
-
-        yield return new WaitForSeconds(0.2f);
-
-        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", this.optionsOnlySession.options.VolumeLevel);
-        sender = GameObject.Find("VolumeSlider");
-        GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = this.optionsOnlySession.options.VolumeLevel;
-
+        GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = Globals.options.VolumeLevel;//this.optionsOnlySession.options.VolumeLevel;
+        
         EventSystem.FireInterfaceUpdate(sender, e);
+        yield return null;
     }
 
     public void SetUserBackground()
     {
-        this.options.UserBackgroundsEnabled = GameObject.Find("BackgroundToggle").GetComponent<Toggle>().isOn;
+        Globals.options.UserBackgroundsEnabled = GameObject.Find("BackgroundToggle").GetComponent<Toggle>().isOn;
     }
 
     public void SetUserAudio()
     {
-        this.options.UserAudioEnabled = GameObject.Find("AudioToggle").GetComponent<Toggle>().isOn;
+        Globals.options.UserAudioEnabled = GameObject.Find("AudioToggle").GetComponent<Toggle>().isOn;
     }
 
     public void SetVolumeLevel()
     {
         float val = GameObject.Find("VolumeSlider").GetComponent<Slider>().value;
-        this.optionsOnlySession.options.VolumeLevel = val;
+        Globals.options.VolumeLevel = val;
         GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = val;
     }
 
-    private void OpenOptionsFile()
+    /*private void OpenOptionsFile()
     {
+        Logger.WriteToLog("What");
         this.optionsOnlySession = new GameSession(GameXmlTypes.OptionsXml);
-
+        //Logger.WriteToLog("User Aduio " + this.optionsOnlySession.options.UserAudioEnabled.ToString() + "User Bg " + this.optionsOnlySession.options.UserBackgroundsEnabled.ToString() + " Volume Level " + this.optionsOnlySession.options.VolumeLevel.ToString(), this);
         StartCoroutine("OptionsInterfaceUpdateRoutine");
-    }
+    }*/
 
     public void StartHotseat()
     {
@@ -225,4 +233,9 @@ public class MainMenuHelper : MonoBehaviour {
 
     }
     #endregion
+
+    void OnDestroy()
+    {
+        //Debug.LogError("Some crazy shit is going on here");
+    }
 }

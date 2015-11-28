@@ -35,8 +35,10 @@ public class Game{
 
     public Game()
     {
+        Globals.SetGameMode(GameModes.SinglePlayer);
         this.gameInProgress = true;
         this.CurrentField = new Field(level);
+        Logger.WriteToLog("Current level number " + level.ToString());
         this.HumanPlayer = new Player();
         EventSystem.OnEndLevel += this.ChangeLevel;
         EventSystem.OnEndGame += this.EndGame;
@@ -44,6 +46,7 @@ public class Game{
 
     public Game(GameModes _gameMode)
     {
+        Globals.SetGameMode(_gameMode);
         this.gameInProgress = true;
         this.CurrentField = new Field(level);
         this.HumanPlayer = new Player(Players.FirstPlayer);
@@ -86,9 +89,14 @@ public class Game{
 
     protected void ChangeLevel(object sender, ChangeLevelEventArgs e)
     {
+        Debug.Log("Change level triggered");
         this.NextLevel();
-        if(e.ChangeReason != ChangeLevelReasons.AllBricksDestroyed)
+        if (e.ChangeReason != ChangeLevelReasons.AllBricksDestroyed)
+        {
+            Debug.Log("Should destroy all bricks");
             this.CurrentField.DestroyAllBricks();
+        }
+        
         Debug.LogWarning(this.level.ToString() + " " + MainHelper.CurrentGameSession.CurrentLevels.TotalLevels.ToString());
         if (this.level == MainHelper.CurrentGameSession.CurrentLevels.TotalLevels)
         {
@@ -120,5 +128,12 @@ public class Game{
     public void EndGame(object sender, EndGameEventArgs e)
     {
         this.gameInProgress = false;
+        this.level = 0;
+    }
+
+    public void RemoveDelegates()
+    {
+        EventSystem.OnEndLevel -= this.ChangeLevel;
+        EventSystem.OnEndGame -= this.EndGame;
     }
 }

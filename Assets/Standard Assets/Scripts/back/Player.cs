@@ -92,6 +92,13 @@ public class Player {
         this.playerScoreInterface = GameObject.Find("LevelScoreText");
     }
 
+    public void RemoveDelegates()
+    {
+        EventSystem.OnEndLevel -= this.NextLevel;
+        EventSystem.OnEndGame -= this.EndGame;
+        EventSystem.OnBallCrush -= this.IncCurrentBall;
+    }
+
     public void NextLevel(object sender, ChangeLevelEventArgs ea)
     {
         if ((this.currentLevel + 1) >= this.totalLevels) return;

@@ -12,4 +12,9 @@ public class BallCollisionHandler : MonoBehaviour {
 	void Update () {
 	
 	}
+
+    void OnDestroy()
+    {
+        Debug.Log("Ball object is being destoyed");
+    }
 }

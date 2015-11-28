@@ -19,7 +19,8 @@ public class EventSystem : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        this.mhReference = GameObject.Find("MainHelper").GetComponent<MainHelper>();
+        if(Globals.CurrentGameMode == GameModes.SinglePlayer)
+            this.mhReference = GameObject.Find("MainHelper").GetComponent<MainHelper>();
 	}
 	
 	// Update is called once per frame
@@ -41,6 +42,11 @@ public class EventSystem : MonoBehaviour {
         if (EventSystem.OnEndLevel != null)
         {
             EventSystem.OnEndLevel(sender, e);
+            /*foreach (Delegate del in EventSystem.OnEndLevel.GetInvocationList())
+            {
+                Debug.LogWarning(del.Method.Name.ToString());
+                Debug.LogWarning(del.Target.ToString());
+            }*/
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.LevelChanged, "");
             EventSystem.FireInterfaceUpdate(sender, ev);
         }
@@ -52,12 +58,12 @@ public class EventSystem : MonoBehaviour {
         {
             if (EventSystem.OnEndGame != null)
             {
-                Debug.LogWarning("End Game fired");
+                /*Debug.LogWarning("End Game fired");
                 foreach (Delegate del in EventSystem.OnEndGame.GetInvocationList())
                 {
                     Debug.LogWarning(del.Method.Name.ToString());
                     Debug.LogWarning(del.Target.ToString());
-                }
+                }*/
 
                 EventSystem.OnEndGame(sender, e);
             }
@@ -74,11 +80,26 @@ public class EventSystem : MonoBehaviour {
 
     public static void FireInterfaceUpdate(object sender, InterfaceUpdateEventArgs e)
     {
+        Debug.LogError("Fired");
+        Debug.LogError((EventSystem.OnInterfaceUpdate == null).ToString());
         //Debug.LogWarning((GameObject)sender);
         if (EventSystem.OnInterfaceUpdate != null)
         {
             //Debug.LogWarning((GameObject)sender);
+            foreach (Delegate del in EventSystem.OnInterfaceUpdate.GetInvocationList())
+            {
+                Debug.LogWarning(del.Method.Name);
+                Debug.LogWarning(del.Target.ToString());
+            }
             EventSystem.OnInterfaceUpdate(sender, e);
         }
+    }
+
+    public static void FlushEvents()
+    {
+        EventSystem.OnBallCrush = null;
+        EventSystem.OnEndGame = null;
+        EventSystem.OnEndLevel = null;
+        EventSystem.OnInterfaceUpdate = null;
     }
 }

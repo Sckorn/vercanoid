@@ -45,6 +45,7 @@ public class PlatformMover : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        this.BallGameObject = GameObject.Find("Ball");
         this.StoppageBugFix();
         this.PlatformAwayBugFix();
         //this.BallBehindThePlatformStopBugFix();
@@ -90,26 +91,34 @@ public class PlatformMover : MonoBehaviour {
     {
         this.StopTheBall();
         this.Launched = false;
-        this.BallGameObject.transform.position = new Vector3(this.initialTransform.position.x, this.initialTransform.position.y, this.initialTransform.position.z + 0.2f);
+        //if(this.BallGameObject != null)
+            this.BallGameObject.transform.position = new Vector3(this.initialTransform.position.x, this.initialTransform.position.y, this.initialTransform.position.z + 0.2f);
     }
 
     protected void BallToInitialPosition(object sender, EndGameEventArgs e)
     {
         this.StopTheBall();
         this.Launched = false;
-        this.BallGameObject.transform.position = new Vector3(this.initialTransform.position.x, this.initialTransform.position.y, this.initialTransform.position.z + 0.2f);
+        //if(this.BallGameObject != null)
+            this.BallGameObject.transform.position = new Vector3(this.initialTransform.position.x, this.initialTransform.position.y, this.initialTransform.position.z + 0.2f);
     }
 
     protected void StopTheBall()
     {
-        this.BallRigRef.velocity = Vector3.zero;
-        this.BallRigRef.angularVelocity = Vector3.zero;
+        if (this.BallRigRef != null)
+        {
+            this.BallRigRef.velocity = Vector3.zero;
+            this.BallRigRef.angularVelocity = Vector3.zero;
+        }
     }
 
     protected void StopTheBall(object sender, ChangeLevelEventArgs e)
     {
-        this.BallRigRef.velocity = Vector3.zero;
-        this.BallRigRef.angularVelocity = Vector3.zero;
+        if (this.BallRigRef != null)
+        {
+            this.BallRigRef.velocity = Vector3.zero;
+            this.BallRigRef.angularVelocity = Vector3.zero;
+        }
     }
 
     protected void StopTheBall(object sender, EndGameEventArgs e)
@@ -302,6 +311,15 @@ public class PlatformMover : MonoBehaviour {
         {
             this.LaunchBall(c.contacts[0], true);
         }
+    }
+
+    void OnDestroy()
+    {
+        Debug.Log(this.ToString() + " is being destroyed.");
+        EventSystem.OnEndLevel -= this.StopTheBall;
+        EventSystem.OnEndLevel -= this.BallToInitialPosition;
+        EventSystem.OnEndGame -= this.BallToInitialPosition;
+        EventSystem.OnEndGame -= this.StopTheBall;
     }
 
     #region BugFixes
