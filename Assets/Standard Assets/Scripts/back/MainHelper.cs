@@ -9,12 +9,15 @@ using UnityEngine.UI;
 public class MainHelper : MonoBehaviour {
     private Game currentGame;
     private Transform startingBallPosition;
+    public GameObject FirstPlayerPlatformRef = null;
+    public GameObject SecondPlayerPlatformRef = null;
     private List<AudioClip> clips;
     private int firstClipIndex = 0;
     private int currentClipIndex = 0;
     private int totalClips = 0;
     private AudioSource mainAudioSource;
     private Queue<DelayedCollision> collisionQueue = new Queue<DelayedCollision>();
+    private Queue<DelayedCollision> secondPlayerColiisionQueue = new Queue<DelayedCollision>();
     public static GameSession CurrentGameSession = null;
     private bool EncryptionInProcess = false;
     private int CurrentEncryptingLevel = 0;
@@ -25,7 +28,11 @@ public class MainHelper : MonoBehaviour {
 
     void Awake()
     {
-        Logger.WriteToLog("Main Scene Awake()");        
+        Logger.WriteToLog("Main Scene Awake()");
+        if (Application.loadedLevel == 1)
+        {
+            Globals.SetGameMode(GameModes.SinglePlayer);
+        }
     }
 	
     // Use this for initialization
@@ -38,16 +45,39 @@ public class MainHelper : MonoBehaviour {
         if (Globals.options == null)
         {
             Globals.InitializeOptions();
+            Debug.LogError(Globals.options.VolumeLevel.ToString());
+            if (Globals.options != null)
+            {
+                GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = Globals.options.VolumeLevel;
+                GameObject.Find("InterfaceUpdater").GetComponent<InterfaceUpdater>().volumeLevelSliderReference.GetComponent<Slider>().value = Globals.options.VolumeLevel;
+            }
         }
         GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = Globals.options.VolumeLevel;
         InterfaceUpdateEventArgs iuea = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.VolumeLevel);
         EventSystem.FireInterfaceUpdate( GameObject.Find("VolumeSlider"), iuea);
 
-        this.currentGame = new Game();
+        if (Globals.CurrentGameMode == GameModes.Versus)
+        {
+            this.currentGame = new Game(Globals.CurrentGameMode);
+            GameObject.Find("FirstPlayerBall").GetComponent<BallCollisionHandler>().BelongsToPlayer = Players.FirstPlayer;
+            GameObject.Find("SecondPlayerBall").GetComponent<BallCollisionHandler>().BelongsToPlayer = Players.SecondPlayer;
+        }
+        else
+        {
+            this.currentGame = new Game();
+        }
         
         this.clips = new List<AudioClip>();
         this.mainAudioSource = GameObject.Find("Main Camera").GetComponent<AudioSource>();
-        this.startingBallPosition = GameObject.Find("Ball").transform;
+        if (Globals.CurrentGameMode == GameModes.Versus)
+        {
+            this.startingBallPosition = this.FirstPlayerPlatformRef.transform;
+        }
+        else
+        {
+            this.startingBallPosition = GameObject.Find("Ball").transform;    
+        }
+        
         MainHelper.CurrentGameSession = new GameSession();
 
         Logger.WriteToLog("Levels array length " + MainHelper.CurrentGameSession.CurrentLevels.ActualArrayLength.ToString());
@@ -121,8 +151,37 @@ public class MainHelper : MonoBehaviour {
         {
             DelayedCollision dc = new DelayedCollision();
             dc = this.collisionQueue.Dequeue();
-            GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(dc.cp, dc.platformFlag);
+            GameObject instigator;
+            if(Globals.CurrentGameMode == GameModes.SinglePlayer)
+            {
+                instigator = GameObject.Find("Platform");            
+            }
+            else
+            {
+                instigator = this.FirstPlayerPlatformRef;
+            }
+
+            /*if (dc.sender != null)
+            {
+                instigator = dc.sender;
+            }*/
+            instigator.GetComponent<PlatformMover>().LaunchBall(dc.cp, dc.platformFlag);
+            
             this.collisionQueue.Clear();
+        }
+
+        if (this.secondPlayerColiisionQueue.Count > 0)
+        {
+            DelayedCollision dc = new DelayedCollision();
+            dc = this.secondPlayerColiisionQueue.Dequeue();
+            GameObject instigator = this.SecondPlayerPlatformRef;
+
+            /*if (dc.sender != null)
+            {
+                instigator = dc.sender;
+            }*/
+            instigator.GetComponent<PlatformMover>().LaunchBall(dc.cp, dc.platformFlag, dc.playerOwner);
+            this.secondPlayerColiisionQueue.Clear();
         }
 
         if (!this.UserLevelsCoroutine)
@@ -320,6 +379,18 @@ public class MainHelper : MonoBehaviour {
     public void AddCollisionToQueue(DelayedCollision dc)
     {
         this.collisionQueue.Enqueue(dc);
+    }
+
+    public void AddCollisionToQueue(DelayedCollision dc, Players _pl)
+    {
+        if (_pl == Players.FirstPlayer)
+        {
+            this.collisionQueue.Enqueue(dc);
+        }
+        else
+        {
+            this.secondPlayerColiisionQueue.Enqueue(dc);
+        }
     }
 
     public Game GetCurrentGame()

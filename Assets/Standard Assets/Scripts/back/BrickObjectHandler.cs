@@ -9,6 +9,7 @@ public class BrickObjectHandler : MonoBehaviour {
     public int pointsPerHit = 10;
     private MainHelper mhReference;
     private Object thisLock = new Object();
+    private Players lastHitByPlayer;
 
     public int HitsToKill
     {
@@ -39,9 +40,27 @@ public class BrickObjectHandler : MonoBehaviour {
             if (this.mhReference != null)
             {
                 this.mhReference.GetCurrentGame().GetCurrentField().BrickDestroyed(this.coordinates);
-                this.mhReference.GetCurrentGame().GetHumanPlayer().IncreaseLevelScore(this.hitsToKill * this.pointsPerHit);
-                InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ScoreIncreased, this.mhReference.GetCurrentGame().GetHumanPlayer().GetLevelScore().ToString());
-                EventSystem.FireInterfaceUpdate(this.mhReference.GetCurrentGame().GetHumanPlayer(), e);
+                if (Globals.CurrentGameMode == GameModes.SinglePlayer)
+                {
+                    this.mhReference.GetCurrentGame().GetHumanPlayer().IncreaseLevelScore(this.hitsToKill * this.pointsPerHit);
+                    InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ScoreIncreased, this.mhReference.GetCurrentGame().GetHumanPlayer().GetLevelScore().ToString());
+                    EventSystem.FireInterfaceUpdate(this.mhReference.GetCurrentGame().GetHumanPlayer(), e);
+                }
+                else
+                {
+                    if (this.lastHitByPlayer == Players.FirstPlayer)
+                    {
+                        this.mhReference.GetCurrentGame().GetHumanPlayer().IncreaseLevelScore(this.hitsToKill * this.pointsPerHit);
+                        InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ScoreIncreased, this.mhReference.GetCurrentGame().GetHumanPlayer().GetLevelScore().ToString());
+                        EventSystem.FireInterfaceUpdate(this.mhReference.GetCurrentGame().GetHumanPlayer(), e);    
+                    }
+                    else if (this.lastHitByPlayer == Players.SecondPlayer)
+                    {
+                        this.mhReference.GetCurrentGame().GetSecondHumanPlayer().IncreaseLevelScore(this.hitsToKill * this.pointsPerHit);
+                        InterfaceUpdateEventArgs e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ScoreIncreased, this.mhReference.GetCurrentGame().GetSecondHumanPlayer().GetLevelScore().ToString());
+                        EventSystem.FireInterfaceUpdate(this.mhReference.GetCurrentGame().GetSecondHumanPlayer(), e);
+                    }
+                }
             }
         }
 	}
@@ -54,6 +73,8 @@ public class BrickObjectHandler : MonoBehaviour {
 
     void OnCollisionEnter(Collision c)
     {
+        if (Globals.CurrentGameMode == GameModes.SinglePlayer)
+        {
             if (c.gameObject.name == "Ball")
             {
                 //GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], false);
@@ -64,7 +85,27 @@ public class BrickObjectHandler : MonoBehaviour {
                 else
                     GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], this.gameObject, GameObject.Find("ReverseRotationDummy"), -1);*/
                 ++this.hitsTookPlace;
+                this.lastHitByPlayer = Players.FirstPlayer;
             }
+        }
+        else
+        {
+            if (c.gameObject.tag == "PlayerBall")
+            {
+                Debug.Log("Colliding with player ball in versus mode");
+                Players toPlayer = c.gameObject.GetComponent<BallCollisionHandler>().BelongsToPlayer;
+                //GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], false);
+                DelayedCollision dc = new DelayedCollision(c.contacts[0], false, c.gameObject, toPlayer);
+                GameObject.Find("MainHelper").GetComponent<MainHelper>().AddCollisionToQueue(dc, toPlayer);
+
+                /*if(c.contacts[0].point.z > this.gameObject.transform.position.z)
+                    GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], this.gameObject, GameObject.Find("RotationDummy"), 1);
+                else
+                    GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], this.gameObject, GameObject.Find("ReverseRotationDummy"), -1);*/
+                ++this.hitsTookPlace;
+                this.lastHitByPlayer = toPlayer;
+            }
+        }
             /*if (this.hitsTookPlace == this.hitsToKill)
             {
                 if (c.gameObject.name == "Ball")

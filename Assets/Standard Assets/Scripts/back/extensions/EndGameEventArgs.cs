@@ -38,6 +38,13 @@ public class EndGameEventArgs : EventArgs {
         get { return this.endReason; }
     }
 
+    private string gameResult;
+
+    public string GameResult
+    {
+        get { return this.gameResult; }
+    }
+
     public EndGameEventArgs(int totalScore, string playerName, int endGameLevel)
     {
         this.totalScore = totalScore;
@@ -52,6 +59,15 @@ public class EndGameEventArgs : EventArgs {
         this.playerName = playerName;
         this.endGameLevel = endGameLevel;
         this.endReason = endReason;
+    }
+
+    public EndGameEventArgs(int totalScore, string playerName, int endGameLevel, EndGameReasons endReason, string result)
+    {
+        this.totalScore = totalScore;
+        this.playerName = playerName;
+        this.endGameLevel = endGameLevel;
+        this.endReason = endReason;
+        this.gameResult = result;
     }
 	
 }

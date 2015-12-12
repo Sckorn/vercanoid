@@ -47,6 +47,13 @@ public class InterfaceUpdateEventArgs : EventArgs
         get { return this.targetValue;}
     }
 
+    private Players playerInterface;
+
+    public Players PlayerInterface
+    {
+        get { return this.playerInterface; }
+    }
+
     public InterfaceUpdateEventArgs(InterfaceUpdateReasons updateReason, string updatedValue, Exception thrownException = null)
     {
         this.updateReason = updateReason;
@@ -57,6 +64,13 @@ public class InterfaceUpdateEventArgs : EventArgs
             this.exceptionUpdate = true;
             this.thrownException = thrownException;
         }
+    }
+
+    public InterfaceUpdateEventArgs(InterfaceUpdateReasons updateReason, string updatedValue, Players playerInterface)
+    {
+        this.updateReason = updateReason;
+        this.updatedValue = updatedValue;
+        this.playerInterface = playerInterface;
     }
 
     public InterfaceUpdateEventArgs(InterfaceUpdateReasons updateReason, string updatedValue, object _targetValue)

@@ -19,7 +19,7 @@ public class EventSystem : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        if(Globals.CurrentGameMode == GameModes.SinglePlayer)
+        //if(Globals.CurrentGameMode == GameModes.SinglePlayer)
             this.mhReference = GameObject.Find("MainHelper").GetComponent<MainHelper>();
 	}
 	
@@ -42,11 +42,11 @@ public class EventSystem : MonoBehaviour {
         if (EventSystem.OnEndLevel != null)
         {
             EventSystem.OnEndLevel(sender, e);
-            /*foreach (Delegate del in EventSystem.OnEndLevel.GetInvocationList())
+            foreach (Delegate del in EventSystem.OnEndLevel.GetInvocationList())
             {
                 Debug.LogWarning(del.Method.Name.ToString());
                 Debug.LogWarning(del.Target.ToString());
-            }*/
+            }
             InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.LevelChanged, "");
             EventSystem.FireInterfaceUpdate(sender, ev);
         }
@@ -74,23 +74,19 @@ public class EventSystem : MonoBehaviour {
     {
         if (EventSystem.OnBallCrush != null)
         {
+            foreach(Delegate del in EventSystem.OnBallCrush.GetInvocationList())
+            {
+                Debug.LogWarning(del.Method.Name);
+                Debug.LogWarning(del.Target.ToString());
+            }
             EventSystem.OnBallCrush(sender, e);
         }
     }
 
     public static void FireInterfaceUpdate(object sender, InterfaceUpdateEventArgs e)
     {
-        Debug.LogError("Fired");
-        Debug.LogError((EventSystem.OnInterfaceUpdate == null).ToString());
-        //Debug.LogWarning((GameObject)sender);
         if (EventSystem.OnInterfaceUpdate != null)
         {
-            //Debug.LogWarning((GameObject)sender);
-            foreach (Delegate del in EventSystem.OnInterfaceUpdate.GetInvocationList())
-            {
-                Debug.LogWarning(del.Method.Name);
-                Debug.LogWarning(del.Target.ToString());
-            }
             EventSystem.OnInterfaceUpdate(sender, e);
         }
     }

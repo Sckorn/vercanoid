@@ -2,7 +2,14 @@
 using System.Collections;
 
 public class BallCollisionHandler : MonoBehaviour {
+    public GameObject MotherPlatform = null;
+    private Players belongsToPlayer;
 
+    public Players BelongsToPlayer
+    {
+        get { return this.belongsToPlayer; }
+        set { this.belongsToPlayer = value; }
+    }
 	// Use this for initialization
 	void Start () {
 	

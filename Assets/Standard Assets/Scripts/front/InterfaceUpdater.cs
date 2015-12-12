@@ -24,6 +24,7 @@ public class InterfaceUpdater : MonoBehaviour
     public GameObject backgroundToggleReference = null;
     public GameObject audioToggleReference = null;
     public GameObject volumeLevelSliderReference = null;
+    public GameObject endGameResultReference = null;
 
     /*
      
@@ -73,7 +74,8 @@ public class InterfaceUpdater : MonoBehaviour
         {
             case InterfaceUpdateReasons.BallLost:
                 Player ballLostSender = (Player)sender;
-
+                Debug.Log(ballLostSender.PlayerID.ToString());
+                Debug.LogError("Fired Interface update via ball lost event");
                 if (ballLostSender.PlayerScoreGUI.Equals(this.firstPlayerScore))
                 {
                     int index = ballLostSender.CurrentBall;
@@ -84,11 +86,19 @@ public class InterfaceUpdater : MonoBehaviour
                         target = null;
                     }
                 }
-                else
-                { 
-                    /* enemy ball remove handling*/
+                else if(ballLostSender.PlayerScoreGUI.Equals(this.secondPlayerScore))
+                {
+                    int index = ballLostSender.CurrentBall;
+                    Debug.Log(this.secondPlayerBalls.objectReferences[index - 2].tag);
+                    Debug.Log(this.secondPlayerBalls.objectReferences.Length.ToString());
+                    GameObject target = this.secondPlayerBalls.objectReferences[index - 2];
+                    if (target != null)
+                    {
+                        GameObject.Find("Morpher").GetComponent<Morpher>().KillBallIndicator(target);
+                        target = null;
+                    }
                 }
-
+                
                 break;
             case InterfaceUpdateReasons.LevelChanged:
                 if (this.firstPlayerScore != null)
@@ -105,10 +115,12 @@ public class InterfaceUpdater : MonoBehaviour
                 }
                 else
                 {
-                    /*second player score handling*/
+                    this.secondPlayerScore.GetComponent<Text>().text = e.UpdatedValue;
                 }
                 break;
-            case InterfaceUpdateReasons.GameOver: break;
+            case InterfaceUpdateReasons.GameOver:
+
+                break;
             case InterfaceUpdateReasons.ExceptionThrown:
                 if(e.ExceptionUpdate)
                     this.ShowException(e);
@@ -157,6 +169,10 @@ public class InterfaceUpdater : MonoBehaviour
         if (this.endGameCanvasReference != null)
         {
             this.endGameCanvasReference.GetComponent<Canvas>().enabled = true;
+            if (this.endGameResultReference != null)
+            {
+                this.endGameResultReference.GetComponent<Text>().text = e.GameResult;
+            }
         }
     }
 
@@ -236,7 +252,7 @@ public class InterfaceUpdater : MonoBehaviour
 
     protected void UpdateVolumeSlider(object sender, InterfaceUpdateEventArgs e)
     {
-        Debug.Log("Updating volume");
+        //Debug.Log("Updating volume");
         GameObject goSender;
         try
         {
@@ -252,18 +268,18 @@ public class InterfaceUpdater : MonoBehaviour
 
         if (e.UpdateReason == InterfaceUpdateReasons.OptionChanged)
         {
-            Debug.LogError("Option changed");
+            //Debug.LogError("Option changed");
             if (this.volumeLevelSliderReference != null)
             {
-                Debug.LogError("Slider reference?");
+                /*Debug.LogError("Slider reference?");
                 Debug.LogError("GameObject " + (this.volumeLevelSliderReference.gameObject == null).ToString());
                 Debug.LogError("goSender " + (goSender == null).ToString());
                 Debug.LogError("Equality between them " + (goSender == this.volumeLevelSliderReference.gameObject).ToString());
                 Debug.LogError("Built in reference " + this.volumeLevelSliderReference.ToString());
-                Debug.LogError("Sender reference " + goSender.ToString());
+                Debug.LogError("Sender reference " + goSender.ToString());*/
                 if (goSender.Equals(this.volumeLevelSliderReference.gameObject))
                 {
-                    Debug.LogError("Equals?");
+                    //Debug.LogError("Equals?");
                     float tmp;
                     try
                     {
@@ -321,7 +337,7 @@ public class InterfaceUpdater : MonoBehaviour
     public void ChangeColorsByTagsHotseat()
     {
         GameObject[] firstPlayerUiElements = GameObject.FindGameObjectsWithTag("FirstPlayerUI");
-        Debug.Log(firstPlayerUiElements.Length.ToString());
+
         foreach (GameObject go in firstPlayerUiElements)
         {
             if(go.GetComponent<Text>() != null)

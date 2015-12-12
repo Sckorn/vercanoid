@@ -8,6 +8,7 @@ public class Game{
     private int level = 0;
     private Field CurrentField;
     private Player HumanPlayer;
+    private Player SecondHumanPlayer;
     private bool gamePaused = false;
     private GameModes currentGameMode;
 
@@ -42,6 +43,7 @@ public class Game{
         this.HumanPlayer = new Player();
         EventSystem.OnEndLevel += this.ChangeLevel;
         EventSystem.OnEndGame += this.EndGame;
+        Debug.Log("Game default constructor");
     }
 
     public Game(GameModes _gameMode)
@@ -53,11 +55,12 @@ public class Game{
         
         if(_gameMode == GameModes.Versus)
         {
-            this.HumanPlayer = new Player(Players.SecondPlayer);
+            this.SecondHumanPlayer = new Player(Players.SecondPlayer);            
         }
 
         EventSystem.OnEndLevel += this.ChangeLevel;
         EventSystem.OnEndGame += this.EndGame;
+        Debug.Log("Game constructor with parameter");
     }
 
     public bool LevelIsOver()
@@ -73,6 +76,11 @@ public class Game{
     public Player GetHumanPlayer()
     {
         return this.HumanPlayer;
+    }
+
+    public Player GetSecondHumanPlayer()
+    {
+        return this.SecondHumanPlayer;
     }
 
     public void UpdateUserScoreOnScreen() //deprecated
@@ -100,7 +108,7 @@ public class Game{
         Debug.LogWarning(this.level.ToString() + " " + MainHelper.CurrentGameSession.CurrentLevels.TotalLevels.ToString());
         if (this.level == MainHelper.CurrentGameSession.CurrentLevels.TotalLevels)
         {
-            EndGameEventArgs ea = new EndGameEventArgs(this.HumanPlayer.HighScore, this.HumanPlayer.PlayerName, this.level, EndGameReasons.CompletedAllLevels);
+            EndGameEventArgs ea = new EndGameEventArgs(this.HumanPlayer.HighScore, this.HumanPlayer.PlayerName, this.level, EndGameReasons.CompletedAllLevels, this.DefineResult(EndGameReasons.CompletedAllLevels));
             EventSystem.FireEndGame(this, ea);
         }
         else
@@ -129,6 +137,68 @@ public class Game{
     {
         this.gameInProgress = false;
         this.level = 0;
+    }
+
+    public string DefineResult(EndGameReasons reason)
+    {
+        int firstPlayerPoints;
+        int secondPlayerPoints;
+        int firstPlayerBalls;
+        int SecondPlayerBalls;
+        try
+        {
+            firstPlayerPoints = this.HumanPlayer.HighScore;
+            secondPlayerPoints = this.SecondHumanPlayer.HighScore;
+            firstPlayerBalls = this.HumanPlayer.CurrentBall;
+            SecondPlayerBalls = this.SecondHumanPlayer.CurrentBall;
+        }
+        catch (Exception ex)
+        { 
+#if UNITY_EDITOR
+            Debug.Log("Null player reference");
+            Debug.Log(ex.Message);
+            return string.Empty;
+#else
+            InterfaceUpdateEventArgs iuea = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "Null player reference", ex);
+            EventSystem.FireInterfaceUpdate(this, iuea); 
+            return string.Empty;
+#endif
+        }
+
+        int difference = firstPlayerPoints - secondPlayerPoints;
+
+        string resultString = string.Empty;
+
+        if (reason == EndGameReasons.CompletedAllLevels)
+        {
+            if (difference == 0)
+            {
+                resultString = "Draw";
+            }
+            else
+                if (difference < 0)
+                {
+                    resultString = "Second Player Wins";
+                }
+                else
+                {
+                    resultString = "First Player Wins";
+                }
+        }
+        else if (reason == EndGameReasons.WastedAllBalls)
+        {
+            if (firstPlayerBalls > SecondPlayerBalls)
+            {
+                resultString = "Second Player Wins";
+            }
+            else
+            {
+                resultString = "First Player Wins";
+            }
+        }
+
+        //InterfaceUpdateEventArgs iuea = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.
+        return resultString;
     }
 
     public void RemoveDelegates()

@@ -287,17 +287,13 @@ public class Field {
     public void DestroyAllBricks()
     {
         Time.timeScale = 0;
-        Debug.Log("Deleting dem bricks");
+
         for (int i = 0; i < this.sizeX; i++)
         {
             for (int j = 0; j < this.sizeY; j++)
             {
                 if (this.grid[i, j].HasBrick)
                 {
-                    //Debug.Log("Has brick");
-                    //Debug.Log(this.grid[i, j].ObjectReference);
-                    //this.grid[i, j].ObjectReference.renderer.material.color = Color.black;
-                    //this.grid[i, j].ObjectReference.transform.position = new Vector3(this.grid[i, j].ObjectReference.transform.position.x, 20.0f, this.grid[i, j].ObjectReference.transform.position.z);
                     GameObject.Find("Morpher").GetComponent<Morpher>().DestroyBrick(this.grid[i, j].ObjectReference);
                 }
             }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -80,16 +81,29 @@ public class Player {
     {
         this.playerIdentificator = player;
         if (this.playerIdentificator == Players.FirstPlayer)
+        {
             this.ballReference = GameObject.Find("Morpher").GetComponent<Morpher>().firstPlayerBallReference;
+            this.playerName = "Player1";
+            this.playerScoreInterface = GameObject.Find("InterfaceUpdater").GetComponent<InterfaceUpdater>().firstPlayerScore;
+        }
         else
+        {
             this.ballReference = GameObject.Find("Morpher").GetComponent<Morpher>().secondPlayerBallReference;
+            this.playerName = "Player2";
+            this.playerScoreInterface = GameObject.Find("InterfaceUpdater").GetComponent<InterfaceUpdater>().secondPlayerScore;
+        }
+
+        /* player score region */
         this.scorePerLevel = new List<int>();
         this.scorePerLevel.Add(0);
+        /* player event delegates */
         EventSystem.OnEndLevel += this.NextLevel;
         EventSystem.OnEndGame += this.EndGame;
         EventSystem.OnBallCrush += this.IncCurrentBall;
-        GameObject.Find("FirstPlayerName").GetComponent<Text>().text = this.PlayerName;
-        this.playerScoreInterface = GameObject.Find("LevelScoreText");
+        /* player interface basic setup*/
+        string playerIdObjName = (this.playerIdentificator == Players.FirstPlayer) ? "FirstPlayerName" : "SecondPlayerName";
+
+        GameObject.Find(playerIdObjName).GetComponent<Text>().text = this.PlayerName;
     }
 
     public void RemoveDelegates()
@@ -150,14 +164,17 @@ public class Player {
 
     public void IncCurrentBall(object sender, BallCrushedEventArgs e)
     {
-        /*TODO: research on invoking using reflection, probably it will be much more efficient to use enums to invoke methods with special naming rules using parts of enum [On<EnumName>Action(object, EventArgs)]*/
-        switch (e.CrushReasons)
+        if (e.FromPlayer == this.playerIdentificator)
         {
-            case BallCrushReasons.EnenmyBackWallCrush: break; // vs mode
-            case BallCrushReasons.PlayerBackWallCrush:
-                this.IncBallNum(sender, e);
-                break;
-            case BallCrushReasons.UnknownReason: break;
+            /*TODO: research on invoking using reflection, probably it will be much more efficient to use enums to invoke methods with special naming rules using parts of enum [On<EnumName>Action(object, EventArgs)]*/
+            switch (e.CrushReasons)
+            {
+                case BallCrushReasons.EnenmyBackWallCrush: this.IncBallNum(sender, e); break; // vs mode
+                case BallCrushReasons.PlayerBackWallCrush:
+                    this.IncBallNum(sender, e);
+                    break;
+                case BallCrushReasons.UnknownReason: break;
+            }
         }
     }
 
@@ -166,13 +183,21 @@ public class Player {
         if (this.currentBall <= this.totalBalls)
         {
             ++this.currentBall;
-            InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.BallLost, string.Empty);
-            EventSystem.FireInterfaceUpdate(this, ev);
+            if (Globals.CurrentGameMode == GameModes.SinglePlayer)
+            {
+                InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.BallLost, string.Empty);
+                EventSystem.FireInterfaceUpdate(this, ev);
+            }
+            else
+            {
+                InterfaceUpdateEventArgs ev = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.BallLost, string.Empty, this.playerIdentificator);
+                EventSystem.FireInterfaceUpdate(this, ev);
+            }
         }
         else
         {
             object snd = new object();
-            EndGameEventArgs ev = new EndGameEventArgs(this.highScore, this.playerName, this.currentLevel, EndGameReasons.WastedAllBalls);
+            EndGameEventArgs ev = new EndGameEventArgs(this.highScore, this.playerName, this.currentLevel, EndGameReasons.WastedAllBalls, GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().DefineResult(EndGameReasons.WastedAllBalls));
             EventSystem.FireEndGame(snd, ev); // TODO: eventsystem game end event 
         }
     }
@@ -182,13 +207,14 @@ public class Player {
         switch (e.EndReason)
         {
             case EndGameReasons.CompletedAllLevels:
-                    
+                EndGameEventArgs egea = new EndGameEventArgs(this.highScore, this.playerName, this.currentLevel, EndGameReasons.CompletedAllLevels, GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().DefineResult(EndGameReasons.CompletedAllLevels));
                 break;
             case EndGameReasons.WastedAllBalls:
                 this.WastedAllBallsEnd(sender, e);
                 break;
-            case EndGameReasons.UnknownReason: 
-                    
+            case EndGameReasons.UnknownReason:
+                InterfaceUpdateEventArgs iuea = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.ExceptionThrown, "End game exceptions", new Exception("Unknown game end reason"));
+                EventSystem.FireInterfaceUpdate(this, iuea);
                 break;
         }
     }
@@ -199,10 +225,6 @@ public class Player {
         MainHelper mh = GameObject.Find("MainHelper").GetComponent<MainHelper>();
         Game currentGame = mh.GetCurrentGame();
         currentGame.GameInProgress = false;
-
-        GameObject ballObj = null;
-
-        ballObj = GameObject.Find("Ball");
 
         GameObject.Find("Morpher").GetComponent<Morpher>().KillTheBall();
     }

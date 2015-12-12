@@ -140,6 +140,7 @@ public class MainMenuHelper : MonoBehaviour {
 
     public void StartHotseat()
     {
+        EventSystem.FlushEvents();
         Application.LoadLevel(2);
     }
 
