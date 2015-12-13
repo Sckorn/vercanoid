@@ -92,7 +92,6 @@ public class BrickObjectHandler : MonoBehaviour {
         {
             if (c.gameObject.tag == "PlayerBall")
             {
-                Debug.Log("Colliding with player ball in versus mode");
                 Players toPlayer = c.gameObject.GetComponent<BallCollisionHandler>().BelongsToPlayer;
                 //GameObject.Find("Platform").GetComponent<PlatformMover>().LaunchBall(c.contacts[0], false);
                 DelayedCollision dc = new DelayedCollision(c.contacts[0], false, c.gameObject, toPlayer);

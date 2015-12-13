@@ -12,6 +12,7 @@ public class PlatformMover : MonoBehaviour {
     private int lastDirection = 0;
     private float initialTransformX;
     private Transform initialTransform;
+    private Transform ballInitialTransform;
     private float stoppageTime = 0.0f;
     private ContactPoint lastCp;
     private Players belongsToPlayer;
@@ -38,8 +39,7 @@ public class PlatformMover : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        Debug.LogError("Size X " + gameObject.GetComponent<Renderer>().bounds.size.x.ToString());
-        Debug.LogWarning(Globals.CurrentGameMode.ToString());
+        Debug.LogError("Current game mode " + Globals.CurrentGameMode.ToString());
         if (gameObject.tag.Equals("SecondPlayerPlatform"))
         {
             this.belongsToPlayer = Players.SecondPlayer;
@@ -53,7 +53,7 @@ public class PlatformMover : MonoBehaviour {
         else
         {
             this.belongsToPlayer = Players.FirstPlayer;
-            //this.ConnectedBallObject.GetComponent<BallCollisionHandler>().BelongsToPlayer = Players.FirstPlayer;
+            this.ConnectedBallObject.GetComponent<BallCollisionHandler>().BelongsToPlayer = Players.FirstPlayer;
         }
 
         this.gameObject.rigidbody.freezeRotation = true;
@@ -68,10 +68,10 @@ public class PlatformMover : MonoBehaviour {
         }
         this.RigBodyRef = this.GetComponent<Rigidbody>();
         this.BallRigRef = this.BallGameObject.GetComponent<Rigidbody>();
-        //this.gameObject.renderer.material.color = Color.red;
-        //this.BallRigRef.renderer.material.color = Color.green;
+
         this.initialTransformX = gameObject.transform.position.x;
         this.initialTransform = this.gameObject.transform;
+        this.ballInitialTransform = this.BallGameObject.transform;
         this.BallRigRef.freezeRotation = true;
         EventSystem.OnEndLevel += this.StopTheBall;
         EventSystem.OnEndLevel += this.BallToInitialPosition;
@@ -116,7 +116,9 @@ public class PlatformMover : MonoBehaviour {
                 horAxis = Input.GetAxis("HorizontalSecond");
                 buttonToFire = "Fire2";
             }
-        }       
+        }
+
+        if (Input.GetKeyUp(KeyCode.Q)) this.LaunchBall(1);
 
         if (!GameObject.Find("MainHelper").GetComponent<MainHelper>().GetCurrentGame().GamePaused)
         {
@@ -145,7 +147,6 @@ public class PlatformMover : MonoBehaviour {
 
                             if (Input.GetButtonUp(buttonToFire))
                             {
-                                //this.LaunchBall((buttonToFire.Equals("Fire1") ? 1 : 1));
                                 this.LaunchBall(1);
                                 this.launched = true;
                                 this.lastDirection = 1;
@@ -159,24 +160,12 @@ public class PlatformMover : MonoBehaviour {
 
     protected void BallToInitialPosition(object sender, ChangeLevelEventArgs e)
     {
-        this.StopTheBall();
-        this.Launched = false;
-        //if(this.BallGameObject != null)
-        float addition = 0.0f;
-        if (this.belongsToPlayer == Players.FirstPlayer) addition = +0.2f; else addition = -0.2f;
-        this.BallGameObject.transform.position = new Vector3(this.initialTransform.position.x, this.initialTransform.position.y, this.initialTransform.position.z + addition);
-        this.BallGameObject.transform.rotation = this.initialTransform.rotation;
+        this.BallToInitialPosition();
     }
 
     protected void BallToInitialPosition(object sender, EndGameEventArgs e)
     {
-        this.StopTheBall();
-        this.Launched = false;
-        //if(this.BallGameObject != null)
-        float addition = 0.0f;
-        if (this.belongsToPlayer == Players.FirstPlayer) addition = +0.2f; else addition = -0.2f;
-        this.BallGameObject.transform.position = new Vector3(this.initialTransform.position.x, this.initialTransform.position.y, this.initialTransform.position.z + addition);
-        this.BallGameObject.transform.rotation = this.initialTransform.rotation;
+        this.BallToInitialPosition();
     }
 
     public void BallToInitialPosition()
@@ -185,8 +174,16 @@ public class PlatformMover : MonoBehaviour {
         this.Launched = false;
         float addition = 0.0f;
         if (this.belongsToPlayer == Players.FirstPlayer) addition = +0.2f; else addition = -0.2f;
-        this.BallGameObject.transform.position = new Vector3(this.initialTransform.position.x, this.initialTransform.position.y, this.initialTransform.position.z + addition);
-        this.BallGameObject.transform.rotation = this.initialTransform.rotation;
+        this.BallGameObject.transform.position = /*this.ballInitialTransform.position;*/new Vector3(this.initialTransform.position.x, this.initialTransform.position.y, this.initialTransform.position.z + addition);
+        if (this.belongsToPlayer == Players.FirstPlayer)
+            this.BallGameObject.transform.rotation = this.ballInitialTransform.rotation;
+        else
+        {
+            this.BallGameObject.transform.rotation = Quaternion.identity;//this.ballInitialTransform.rotation;
+            this.BallGameObject.GetComponent<Rigidbody>().freezeRotation = false;
+            this.BallGameObject.transform.Rotate(0.0f, 180.0f, 0.0f);
+            this.BallGameObject.GetComponent<Rigidbody>().freezeRotation = true;
+        }
     }
 
     protected void StopTheBall()
@@ -197,14 +194,12 @@ public class PlatformMover : MonoBehaviour {
 
     protected void StopTheBall(object sender, ChangeLevelEventArgs e)
     {
-        this.BallRigRef.velocity = Vector3.zero;
-        this.BallRigRef.angularVelocity = Vector3.zero;
+        this.StopTheBall();
     }
 
     protected void StopTheBall(object sender, EndGameEventArgs e)
     {
-        this.BallRigRef.velocity = Vector3.zero;
-        this.BallRigRef.angularVelocity = Vector3.zero;
+        this.StopTheBall();
     }
 
     protected bool SideWallsCollisionPreDetection(float axisValue) // returns true if collision object is at 0.1f distance false if not, which basically means that methond returns true if collision would have taken place
@@ -253,29 +248,7 @@ public class PlatformMover : MonoBehaviour {
     public void LaunchBall(int direction)
     {
         this.BallRigRef.AddForce(this.gameObject.transform.forward * this.thrust * direction);
-        Debug.LogError("Initial direction " + this.gameObject.transform.forward.ToString());
-        //Time.timeScale = 0;
         this.lastDirection = direction;
-    }
-
-    public void LaunchBall(ContactPoint cp, GameObject collidedWith, GameObject rotationDummy, int multiplier)
-    {
-        Debug.Log("IN");
-        Quaternion initialRotation = rotationDummy.transform.rotation;
-        this.StopTheBall();
-        this.BallRigRef.freezeRotation = false;
-        Vector3 newDir = Vector3.zero;
-        Vector3 curDir = this.BallRigRef.transform.TransformDirection(Vector3.forward);
-        float differenceBetweenContactAndCenter = ((cp.point.x - collidedWith.transform.position.x) + 0.1f) * multiplier;
-        Debug.Log(differenceBetweenContactAndCenter.ToString());
-        float modifier = 60.0f * differenceBetweenContactAndCenter;
-        rotationDummy.transform.Rotate(0.0f, modifier, 0.0f);
-        Quaternion targetRotation = rotationDummy.transform.rotation;
-        this.BallRigRef.transform.rotation = targetRotation;
-        Vector3 targVector = this.BallRigRef.transform.TransformDirection(Vector3.forward);
-        this.BallRigRef.AddForce(targVector * this.thrust);
-        this.BallRigRef.freezeRotation = true;
-        rotationDummy.transform.rotation = initialRotation;
     }
 
     #region valid_launch_ball_for_single
@@ -466,25 +439,11 @@ public class PlatformMover : MonoBehaviour {
 
     protected void LaunchBallStraight(Vector3 newDir, Vector3 curDir)
     {
-        Debug.LogError("Rotation result " + (Quaternion.FromToRotation(curDir, newDir)).eulerAngles.ToString());
         if(Globals.CurrentGameMode == GameModes.SinglePlayer)
             this.BallRigRef.rotation = Quaternion.FromToRotation(Vector3.forward, newDir);
         else
             this.BallRigRef.rotation = Quaternion.FromToRotation(curDir, newDir);
         this.BallRigRef.AddForce(newDir * this.thrust);
-    }
-
-    public void SimpleReflect(ContactPoint cp) //currently unused, remove later
-    {
-        this.BallRigRef.velocity = Vector3.zero;
-        this.BallRigRef.angularVelocity = Vector3.zero;
-        Vector3 newDir = Vector3.zero;
-        Vector3 curDir = this.BallRigRef.transform.TransformDirection(Vector3.forward);
-        
-        newDir = Vector3.Reflect(curDir, cp.normal);
-
-        this.BallRigRef.rotation = Quaternion.FromToRotation(Vector3.forward, newDir);
-        this.BallRigRef.AddForce(this.ConnectedBallObject.transform.forward * this.thrust);
     }
 
     void OnCollisionEnter(Collision c)
@@ -501,14 +460,12 @@ public class PlatformMover : MonoBehaviour {
             if (c.gameObject.tag.Equals("PlayerBall") && this.launched)
             {
                 c.gameObject.GetComponent<BallCollisionHandler>().MotherPlatform.GetComponent<PlatformMover>().LaunchBall(c.contacts[0], true, c.gameObject.GetComponent<BallCollisionHandler>().BelongsToPlayer);
-                //this.LaunchBall(c.contacts[0], true, c.gameObject.GetComponent<BallCollisionHandler>().BelongsToPlayer);
             }
         }
     }
 
     void OnDestroy()
     {
-        Debug.Log(this.ToString() + " is being destroyed.");
         EventSystem.OnEndLevel -= this.StopTheBall;
         EventSystem.OnEndLevel -= this.BallToInitialPosition;
         EventSystem.OnEndGame -= this.BallToInitialPosition;
@@ -609,7 +566,6 @@ public class PlatformMover : MonoBehaviour {
         {
             Vector3 initialVelocity = this.BallRigRef.velocity;
             this.StopTheBall();
-            //this.BallRigRef.AddForce((initialVelocity / 2) * this.thrust);
         }
     }
 

@@ -33,6 +33,11 @@ public class MainHelper : MonoBehaviour {
         {
             Globals.SetGameMode(GameModes.SinglePlayer);
         }
+        else
+            if (Application.loadedLevel == 2)
+            {
+                Globals.SetGameMode(GameModes.Versus);
+            }
     }
 	
     // Use this for initialization
@@ -45,7 +50,7 @@ public class MainHelper : MonoBehaviour {
         if (Globals.options == null)
         {
             Globals.InitializeOptions();
-            Debug.LogError(Globals.options.VolumeLevel.ToString());
+
             if (Globals.options != null)
             {
                 GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = Globals.options.VolumeLevel;
@@ -85,7 +90,6 @@ public class MainHelper : MonoBehaviour {
         Logger.WriteToLog("Level 0 path " + MainHelper.CurrentGameSession.CurrentLevels[0].LevelPath);
         StartCoroutine("UserLevelsAddition");
 
-        //this.BgLoader();
         if (Globals.options.UserAudioEnabled)
         {
             this.UserBgAudioLoader();
@@ -103,8 +107,7 @@ public class MainHelper : MonoBehaviour {
         {
             this.BgLoader();
         }
-        //this.BgAudioLoader();
-        //this.UserBgAudioLoader();
+        //Time.timeScale = 1;
     }
 	
 	// Update is called once per frame
@@ -115,7 +118,7 @@ public class MainHelper : MonoBehaviour {
             EndGameEventArgs e = new EndGameEventArgs(this.currentGame.GetHumanPlayer().HighScore, this.currentGame.GetHumanPlayer().PlayerName, this.currentGame.Level, EndGameReasons.CompletedAllLevels);
             EventSystem.FireEndGame(this, e);
         }
-        //Debug.Log(this.currentGame.GetHumanPlayer().CurrentBall.ToString());
+
         if (Input.GetButtonUp("PauseGame"))
         {
             if (this.currentGame.GamePaused)
@@ -161,10 +164,6 @@ public class MainHelper : MonoBehaviour {
                 instigator = this.FirstPlayerPlatformRef;
             }
 
-            /*if (dc.sender != null)
-            {
-                instigator = dc.sender;
-            }*/
             instigator.GetComponent<PlatformMover>().LaunchBall(dc.cp, dc.platformFlag);
             
             this.collisionQueue.Clear();
@@ -176,10 +175,6 @@ public class MainHelper : MonoBehaviour {
             dc = this.secondPlayerColiisionQueue.Dequeue();
             GameObject instigator = this.SecondPlayerPlatformRef;
 
-            /*if (dc.sender != null)
-            {
-                instigator = dc.sender;
-            }*/
             instigator.GetComponent<PlatformMover>().LaunchBall(dc.cp, dc.platformFlag, dc.playerOwner);
             this.secondPlayerColiisionQueue.Clear();
         }
@@ -655,6 +650,7 @@ public class MainHelper : MonoBehaviour {
         this.currentGame.RemoveDelegates();
         this.currentGame.GetHumanPlayer().RemoveDelegates();
         EventSystem.FlushEvents();
+        Time.timeScale = 1;
         Application.LoadLevel(0);
     }
 
@@ -663,12 +659,16 @@ public class MainHelper : MonoBehaviour {
         Application.LoadLevel(1);
     }
 
+    public void ResumeGame()
+    {
+        this.currentGame.ResumeGame();
+    }
+
     public void HandleVolumeSlider()
     {
         float volume = GameObject.Find("VolumeSlider").GetComponent<Slider>().value;
-        Debug.Log("Volume now is " + volume.ToString());
+
         Globals.options.VolumeLevel = volume;
-        Debug.Log("Volume in globals " + Globals.options.VolumeLevel.ToString());
         GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = volume;
     }
 }

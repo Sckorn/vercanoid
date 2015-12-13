@@ -43,7 +43,6 @@ public class Game{
         this.HumanPlayer = new Player();
         EventSystem.OnEndLevel += this.ChangeLevel;
         EventSystem.OnEndGame += this.EndGame;
-        Debug.Log("Game default constructor");
     }
 
     public Game(GameModes _gameMode)
@@ -60,7 +59,6 @@ public class Game{
 
         EventSystem.OnEndLevel += this.ChangeLevel;
         EventSystem.OnEndGame += this.EndGame;
-        Debug.Log("Game constructor with parameter");
     }
 
     public bool LevelIsOver()
@@ -97,15 +95,12 @@ public class Game{
 
     protected void ChangeLevel(object sender, ChangeLevelEventArgs e)
     {
-        Debug.Log("Change level triggered");
         this.NextLevel();
         if (e.ChangeReason != ChangeLevelReasons.AllBricksDestroyed)
         {
-            Debug.Log("Should destroy all bricks");
             this.CurrentField.DestroyAllBricks();
         }
         
-        Debug.LogWarning(this.level.ToString() + " " + MainHelper.CurrentGameSession.CurrentLevels.TotalLevels.ToString());
         if (this.level == MainHelper.CurrentGameSession.CurrentLevels.TotalLevels)
         {
             EndGameEventArgs ea = new EndGameEventArgs(this.HumanPlayer.HighScore, this.HumanPlayer.PlayerName, this.level, EndGameReasons.CompletedAllLevels, this.DefineResult(EndGameReasons.CompletedAllLevels));

@@ -149,6 +149,7 @@ public class InterfaceUpdater : MonoBehaviour
     public void ToMainMenuClickHandler()
     {
         EventSystem.FlushEvents();
+        Time.timeScale = 1;
         Application.LoadLevel(0);
     }
 

@@ -55,6 +55,7 @@ public class BackWallHandler : MonoBehaviour {
                 {
                     this.BallCrush(this.CorrespondingPlatform.GetComponent<PlatformMover>().ConnectedBallObject, this.CorrespondingPlatform);
                     c.gameObject.GetComponent<BallCollisionHandler>().MotherPlatform.GetComponent<PlatformMover>().BallToInitialPosition();
+                    this.CorrespondingPlatform.GetComponent<PlatformMover>().BallToInitialPosition();
                 }
                 else
                 {
@@ -83,20 +84,25 @@ public class BackWallHandler : MonoBehaviour {
 
     public void BallCrush(GameObject collisionObject, GameObject correspondingPlatform)
     {
-        Debug.LogError("Ball crushed");
         Transform plateTransform = correspondingPlatform.transform;
         GameObject ballObj = collisionObject;
         ballObj.GetComponent<Rigidbody>().velocity = Vector3.zero;
         ballObj.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
         Vector3 newBallPosition = Vector3.zero;
-        if(collisionObject.GetComponent<BallCollisionHandler>().BelongsToPlayer == Players.FirstPlayer)
+        if (collisionObject.GetComponent<BallCollisionHandler>().BelongsToPlayer == Players.FirstPlayer)
+        {
             newBallPosition = new Vector3(plateTransform.position.x, 0.25f, plateTransform.position.z + 0.2f);
+            ballObj.transform.rotation = Quaternion.identity;
+        }
 
-        if(collisionObject.GetComponent<BallCollisionHandler>().BelongsToPlayer == Players.SecondPlayer)
+        if (collisionObject.GetComponent<BallCollisionHandler>().BelongsToPlayer == Players.SecondPlayer)
+        {
             newBallPosition = new Vector3(plateTransform.position.x, 0.25f, plateTransform.position.z - 0.2f);
+            ballObj.transform.Rotate(0.0f, 180.0f, 0.0f);
+        }
 
         ballObj.transform.position = newBallPosition;
-        ballObj.transform.rotation = Quaternion.identity;
+        
         PlatformMover pm = correspondingPlatform.GetComponent<PlatformMover>();
         pm.Launched = false;
         object sender = new object();

@@ -95,7 +95,6 @@ public class MainMenuHelper : MonoBehaviour {
 
         //yield return new WaitForSeconds(0.2f);
 
-        Debug.Log("After first yield");
         e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.UserBackgroundsEnabled); //this.optionsOnlySession.options.UserBackgroundsEnabled);
 
         EventSystem.FireInterfaceUpdate(GameObject.Find("BackgroundToggle"), e);
@@ -103,7 +102,6 @@ public class MainMenuHelper : MonoBehaviour {
 
 
         //yield return new WaitForSeconds(0.2f);
-        Debug.Log("After second yield");
         e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.VolumeLevel); //this.optionsOnlySession.options.VolumeLevel);
         sender = GameObject.Find("VolumeSlider");
 
