@@ -56,7 +56,7 @@ public class PlatformMover : MonoBehaviour {
             this.ConnectedBallObject.GetComponent<BallCollisionHandler>().BelongsToPlayer = Players.FirstPlayer;
         }
 
-        this.gameObject.rigidbody.freezeRotation = true;
+        this.gameObject.GetComponent<Rigidbody>().freezeRotation = true;
 
         if (Globals.CurrentGameMode == GameModes.Versus)
         {
@@ -82,14 +82,14 @@ public class PlatformMover : MonoBehaviour {
         {
             if (this.gameObject.tag.Equals("FirstPlayerPlatform"))
             {
-                this.gameObject.renderer.material.color = Color.white;
-                this.BallGameObject.renderer.material.color = Color.red;
+                this.gameObject.GetComponent<Renderer>().material.color = Color.white;
+                this.BallGameObject.GetComponent<Renderer>().material.color = Color.red;
             }
 
             if (this.gameObject.tag.Equals("SecondPlayerPlatform"))
             {
-                this.gameObject.renderer.material.color = Color.gray;
-                this.BallGameObject.renderer.material.color = Color.blue;
+                this.gameObject.GetComponent<Renderer>().material.color = Color.gray;
+                this.BallGameObject.GetComponent<Renderer>().material.color = Color.blue;
             }            
         }
         //Time.timeScale = 0;

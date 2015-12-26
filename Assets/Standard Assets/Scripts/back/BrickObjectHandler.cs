@@ -27,7 +27,7 @@ public class BrickObjectHandler : MonoBehaviour {
 	void Start () {
         if (GameObject.Find("MainHelper") != null)
         {
-            gameObject.renderer.material.color = this.choosedColors[Random.Range(0, this.choosedColors.Length)];
+            gameObject.GetComponent<Renderer>().material.color = this.choosedColors[Random.Range(0, this.choosedColors.Length)];
             this.mhReference = GameObject.Find("MainHelper").GetComponent<MainHelper>();
         }
 	}

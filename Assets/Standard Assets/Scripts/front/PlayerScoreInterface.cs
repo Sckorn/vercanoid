@@ -21,6 +21,6 @@ public class PlayerScoreInterface : MonoBehaviour {
 
     public void UpdateUserScoreOnScreen(int score)
     {  
-        this.gameObject.guiText.text = score.ToString();
+        this.gameObject.GetComponent<GUIText>().text = score.ToString();
     }
 }
