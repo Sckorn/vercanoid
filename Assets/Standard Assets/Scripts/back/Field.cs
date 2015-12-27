@@ -4,6 +4,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
+public enum ControlSymbols
+{
+    _,
+    X,
+    Y,
+    Z
+};
+
 public class Field {
     private int sizeX = 17;
     private int sizeY = 17;
@@ -91,7 +99,7 @@ public class Field {
                     int k = 0;
                     for (int j = 0; j < line.Length; j++)
                     {
-                        if (line[j] == '_' || line[j] == 'x')
+                        if (this.IsControlSymbol(line[j]))//(line[j] == '_' || line[j] == 'x')
                         {
                             this.charTmpgrid[k, i] = line[j];
                             k++;
@@ -163,8 +171,8 @@ public class Field {
                     int k = 0;
                     for (int j = 0; j < line.Length; j++)
                     {
-                        Logger.WriteToLog(line[j].ToString());
-                        if (line[j] == '_' || line[j] == 'x')
+                        //Logger.WriteToLog(line[j].ToString());
+                        if (this.IsControlSymbol(line[j]))//(line[j] == '_' || line[j] == 'x')
                         {
                             this.charTmpgrid[k, i] = line[j];
                             k++;
@@ -193,7 +201,6 @@ public class Field {
         {
             try
             {
-                int i = 0;
                 File.Delete(decryptedFile);
             }
             catch (Exception ex)
@@ -224,7 +231,7 @@ public class Field {
             {
                 for (int j = 0; j < this.sizeY; j++)
                 {
-                    if (this.charTmpgrid[i, j] == 'x')
+                    if (this.IsControlSymbol(this.charTmpgrid[i, j], true))//(this.charTmpgrid[i, j] == 'x')
                     {
                         this.grid[i, j] = new GridCell(i, j, true, this.charTmpgrid[i, j]);
                         this.totalBricks++;
@@ -300,5 +307,42 @@ public class Field {
         }
         
         Time.timeScale = 1;
+    }
+
+    private bool IsControlSymbol(char symb, bool brickFlag = false)
+    {
+        Debug.Log("Enum string representations");
+        Debug.Log(ControlSymbols._.ToString());
+        Debug.Log(ControlSymbols.X.ToString());
+        Debug.Log(ControlSymbols.Y.ToString());
+        Debug.Log(ControlSymbols.Z.ToString());
+
+        string[] symbols = Enum.GetNames(typeof(ControlSymbols));
+
+        if (brickFlag)
+        {
+            string[] tmpArr = new string[symbols.Length - 1];
+            int i = 0;
+            foreach (string s in symbols)
+            {
+                if (!s.Equals("_"))
+                {
+                    tmpArr[i] = s;
+                    i++;
+                }
+            }
+
+            symbols = tmpArr;
+        }
+
+        for (int i = 0; i < symbols.Length; i++)
+        {
+            symbols[i] = symbols[i].ToLower();
+        }
+        string tmp = symb.ToString().ToLower();
+        bool ex = Array.Exists<string>(symbols, (x => x == tmp));
+        Debug.Log("result " + ex.ToString());
+
+        return ex;
     }
 }

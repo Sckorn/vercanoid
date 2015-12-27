@@ -30,7 +30,6 @@ public class GameSession {
         this.CurrentLevels = new GameLevels();
         this.options = new Options();
         this.OpenLevelsFile(string.Empty);
-        //this.OpenOptionsFile(string.Empty);
     }
 
     public GameSession(GameXmlTypes _toOpen)
@@ -44,7 +43,6 @@ public class GameSession {
         else
         {
             Logger.WriteToLog("Opening options");
-            //this.OpenOptionsFile(string.Empty);
         }
     }
 
@@ -223,7 +221,7 @@ public class GameSession {
         finally
         {
             this.BufferedLevelsXmlContents = output;
-            //Debug.Log(totalLevelsFromFile.ToString() + " " + this.CurrentLevels.TotalLevels.ToString() + " " + this.CurrentLevels.ActualArrayLength.ToString());
+            
             if (File.Exists(resultFile))
             {
                 try

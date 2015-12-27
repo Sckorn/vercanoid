@@ -33,7 +33,6 @@ public class InterfaceUpdater : MonoBehaviour
      */
     void Awake()
     {
-        //Debug.LogError("Interface Updater awakes");
         EventSystem.OnInterfaceUpdate += this.UpdateInterface;
         EventSystem.OnInterfaceUpdate += this.UpdateAudioToggle;
         EventSystem.OnInterfaceUpdate += this.UpdateBackgroundToggle;
@@ -41,17 +40,11 @@ public class InterfaceUpdater : MonoBehaviour
         {
             EventSystem.OnInterfaceUpdate += this.UpdateVolumeSlider;
         }
-        //Debug.Log(Globals.options.UserAudioEnabled.ToString() + " " + Globals.options.UserBackgroundsEnabled.ToString() + " " + Globals.options.VolumeLevel.ToString());
     }
 
     void Start()
     {
         EventSystem.OnEndGame += this.ShowEndGameMenu;
-        /*EventSystem.OnInterfaceUpdate += this.UpdateInterface;
-        EventSystem.OnInterfaceUpdate += this.UpdateAudioToggle;
-        EventSystem.OnInterfaceUpdate += this.UpdateBackgroundToggle;
-        EventSystem.OnInterfaceUpdate += this.UpdateVolumeSlider;        */
-        //this.volumeLevelSliderReference = GameObject.Find("VolumeSlider");
     }
 
     void Update()
@@ -188,7 +181,7 @@ public class InterfaceUpdater : MonoBehaviour
         {
             Debug.Log("Sender is null or of a wrong type");
             Debug.Log(exc.Message);
-            //EventSystem.OnInterfaceUpdate -= this.UpdateBackgroundToggle;
+            EventSystem.OnInterfaceUpdate -= this.UpdateBackgroundToggle;
             return;
         }
 
@@ -225,10 +218,10 @@ public class InterfaceUpdater : MonoBehaviour
         {
             Debug.Log("Sender is null or of a wrong type");
             Debug.Log(exc.Message);
-            //EventSystem.OnInterfaceUpdate -= this.UpdateAudioToggle;
+            EventSystem.OnInterfaceUpdate -= this.UpdateAudioToggle;
             return;
         }
-        //Debug.Log(goSender.ToString());
+
         if (e.UpdateReason == InterfaceUpdateReasons.OptionChanged)
         {
             if (this.audioToggleReference != null)
@@ -253,7 +246,6 @@ public class InterfaceUpdater : MonoBehaviour
 
     protected void UpdateVolumeSlider(object sender, InterfaceUpdateEventArgs e)
     {
-        //Debug.Log("Updating volume");
         GameObject goSender;
         try
         {
@@ -263,24 +255,16 @@ public class InterfaceUpdater : MonoBehaviour
         {
             Debug.Log("Sender is null or of a wrong type");
             Debug.Log(exc.Message);
-            //EventSystem.OnInterfaceUpdate -= this.UpdateVolumeSlider;
+            EventSystem.OnInterfaceUpdate -= this.UpdateVolumeSlider;
             return;
         }
 
         if (e.UpdateReason == InterfaceUpdateReasons.OptionChanged)
         {
-            //Debug.LogError("Option changed");
             if (this.volumeLevelSliderReference != null)
             {
-                /*Debug.LogError("Slider reference?");
-                Debug.LogError("GameObject " + (this.volumeLevelSliderReference.gameObject == null).ToString());
-                Debug.LogError("goSender " + (goSender == null).ToString());
-                Debug.LogError("Equality between them " + (goSender == this.volumeLevelSliderReference.gameObject).ToString());
-                Debug.LogError("Built in reference " + this.volumeLevelSliderReference.ToString());
-                Debug.LogError("Sender reference " + goSender.ToString());*/
                 if (goSender.Equals(this.volumeLevelSliderReference.gameObject))
                 {
-                    //Debug.LogError("Equals?");
                     float tmp;
                     try
                     {

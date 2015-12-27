@@ -10,8 +10,8 @@ x	x	x	x	x	x	x	x	x	x	x	x	x	x	x	x	x
 _	x	x	x	x	x	x	x	x	x	x	x	x	x	x	x	_
 _	_	x	x	x	x	x	x	x	x	x	x	x	x	x	_	_
 _	_	_	x	x	x	x	x	x	x	x	x	x	x	_	_	_
-_	_	_	_	x	x	x	x	x	x	x	x	x	_	_	_	_
-_	_	_	_	_	x	x	x	x	x	x	x	_	_	_	_	_
-_	_	_	_	_	_	x	x	x	x	x	_	_	_	_	_	_
-_	_	_	_	_	_	_	x	x	x	_	_	_	_	_	_	_
-_	_	_	_	_	_	_	_	x	_	_	_	_	_	_	_	_
+_	_	_	_	y	y	x	x	x	x	x	y	y	_	_	_	_
+_	_	_	_	_	y	y	x	x	x	y	y	_	_	_	_	_
+_	_	_	_	_	_	z	y	x	y	z	_	_	_	_	_	_
+_	_	_	_	_	_	_	z	y	z	_	_	_	_	_	_	_
+_	_	_	_	_	_	_	_	z	_	_	_	_	_	_	_	_

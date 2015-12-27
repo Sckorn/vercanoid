@@ -19,8 +19,7 @@ public class EventSystem : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        //if(Globals.CurrentGameMode == GameModes.SinglePlayer)
-            this.mhReference = GameObject.Find("MainHelper").GetComponent<MainHelper>();
+        this.mhReference = GameObject.Find("MainHelper").GetComponent<MainHelper>();
 	}
 	
 	// Update is called once per frame
@@ -58,13 +57,6 @@ public class EventSystem : MonoBehaviour {
         {
             if (EventSystem.OnEndGame != null)
             {
-                /*Debug.LogWarning("End Game fired");
-                foreach (Delegate del in EventSystem.OnEndGame.GetInvocationList())
-                {
-                    Debug.LogWarning(del.Method.Name.ToString());
-                    Debug.LogWarning(del.Target.ToString());
-                }*/
-
                 EventSystem.OnEndGame(sender, e);
             }
         }

@@ -28,9 +28,12 @@ public class GridCell {
         if (morph == null) Debug.LogError("no morph");
         try
         {
-
             if (this.hasBrick)
-                this.realObjRef = morph.MorphBrick(this.cellCoords.x, this.cellCoords.y, brickTypeChar);
+            {
+                int cs = (int)Enum.Parse(typeof(ControlSymbols), brickTypeChar.ToString().ToUpper());
+
+                this.realObjRef = morph.MorphBrick(this.cellCoords.x, this.cellCoords.y, brickTypeChar, cs);
+            }
         }
         catch (UnityException e)
         {

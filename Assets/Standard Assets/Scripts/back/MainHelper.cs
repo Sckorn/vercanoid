@@ -107,7 +107,6 @@ public class MainHelper : MonoBehaviour {
         {
             this.BgLoader();
         }
-        //Time.timeScale = 1;
     }
 	
 	// Update is called once per frame
@@ -542,6 +541,7 @@ public class MainHelper : MonoBehaviour {
          * TODO Same as above but with user music
          
          */
+         
         string userDataFolder = "UserData/Music/";
 
         try

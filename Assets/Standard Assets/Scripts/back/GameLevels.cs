@@ -100,7 +100,6 @@ public class GameLevels {
 
         GameLevel[] TmpArr = new GameLevel[this.CurrentLevels.Length - 1];
         Array.Copy(this.CurrentLevels, 0, TmpArr, 0, TmpArr.Length);
-        //this.CurrentLevels.CopyTo(TmpArr, 0);
 
         this.CurrentLevels = TmpArr;
         this.totalLevels--;
