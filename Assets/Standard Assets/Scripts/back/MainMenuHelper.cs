@@ -88,24 +88,21 @@ public class MainMenuHelper : MonoBehaviour {
         object sender;
         Debug.Log("Coroutine started");
 
-        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.UserAudioEnabled);//this.optionsOnlySession.options.UserAudioEnabled);
+        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.UserAudioEnabled);
         
         EventSystem.FireInterfaceUpdate(GameObject.Find("AudioToggle"), e);
-        //GameObject.Find("AudioToggle").GetComponent<Toggle>().isOn = Globals.options.UserAudioEnabled;
 
-        //yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.2f);
 
-        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.UserBackgroundsEnabled); //this.optionsOnlySession.options.UserBackgroundsEnabled);
+        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.UserBackgroundsEnabled);
 
         EventSystem.FireInterfaceUpdate(GameObject.Find("BackgroundToggle"), e);
-        //GameObject.Find("BackgroundToggle").GetComponent<Toggle>().isOn = Globals.options.UserBackgroundsEnabled;
 
-
-        //yield return new WaitForSeconds(0.2f);
-        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.VolumeLevel); //this.optionsOnlySession.options.VolumeLevel);
+        yield return new WaitForSeconds(0.2f);
+        e = new InterfaceUpdateEventArgs(InterfaceUpdateReasons.OptionChanged, "", Globals.options.VolumeLevel);
         sender = GameObject.Find("VolumeSlider");
 
-        GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = Globals.options.VolumeLevel;//this.optionsOnlySession.options.VolumeLevel;
+        GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = Globals.options.VolumeLevel;
         
         EventSystem.FireInterfaceUpdate(sender, e);
         yield return null;
@@ -127,14 +124,6 @@ public class MainMenuHelper : MonoBehaviour {
         Globals.options.VolumeLevel = val;
         GameObject.Find("Main Camera").GetComponent<AudioSource>().volume = val;
     }
-
-    /*private void OpenOptionsFile()
-    {
-        Logger.WriteToLog("What");
-        this.optionsOnlySession = new GameSession(GameXmlTypes.OptionsXml);
-        //Logger.WriteToLog("User Aduio " + this.optionsOnlySession.options.UserAudioEnabled.ToString() + "User Bg " + this.optionsOnlySession.options.UserBackgroundsEnabled.ToString() + " Volume Level " + this.optionsOnlySession.options.VolumeLevel.ToString(), this);
-        StartCoroutine("OptionsInterfaceUpdateRoutine");
-    }*/
 
     public void StartHotseat()
     {

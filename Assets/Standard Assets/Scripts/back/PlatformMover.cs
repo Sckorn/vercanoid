@@ -92,7 +92,6 @@ public class PlatformMover : MonoBehaviour {
                 this.BallGameObject.GetComponent<Renderer>().material.color = Color.blue;
             }            
         }
-        //Time.timeScale = 0;
 	}
 	
 	// Update is called once per frame
@@ -252,38 +251,7 @@ public class PlatformMover : MonoBehaviour {
     {
         this.StopTheBall();
         this.BallRigRef.freezeRotation = false;
-        /*Vector3 newDir = Vector3.zero;
-        Vector3 curDir = this.BallRigRef.transform.TransformDirection(Vector3.forward);
         
-        float differenceBetweenContactAndCenter = cp.point.x - this.gameObject.transform.position.x;
-
-        if (platformFlag) //hit the platform
-        {
-            {
-                if (differenceBetweenContactAndCenter == 0) differenceBetweenContactAndCenter = 0.1f;
-                float modifier = 60.0f * differenceBetweenContactAndCenter;
-                GameObject.Find("RotationDummy").transform.Rotate(0.0f, modifier, 0.0f);
-                Quaternion targetRotation = GameObject.Find("RotationDummy").transform.rotation;
-                this.BallRigRef.transform.rotation = targetRotation;
-                Vector3 targVector = this.BallRigRef.transform.TransformDirection(Vector3.forward);
-                this.BallRigRef.AddForce(targVector * this.thrust);
-                this.BallRigRef.freezeRotation = true;
-                GameObject.Find("RotationDummy").transform.rotation = Quaternion.identity;
-            }
-        }
-        else // hit something else
-        {
-            newDir = Vector3.Reflect(curDir, cp.normal);
-            if (this.CheckForStraightAngleBug(newDir))
-            {
-                Vector3 tmpDir = new Vector3(newDir.x + (Random.Range(0.5f, 1.5f) - 1.0f), 0.0f, (Random.Range(0.5f, 1.5f) - 1.0f));
-                newDir = tmpDir;
-            }
-            LaunchBallStraight(newDir, curDir);
-            this.BallRigRef.freezeRotation = true;
-        }
-
-        this.lastCp = cp;*/
         Vector3 newDir = Vector3.Reflect(this.BallGameObject.transform.forward, cp.normal);
         if (this.CheckForStraightAngleBug(newDir))
         {

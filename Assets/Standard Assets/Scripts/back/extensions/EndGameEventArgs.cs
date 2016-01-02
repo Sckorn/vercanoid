@@ -4,12 +4,6 @@ using System.Collections;
 
 public class EndGameEventArgs : EventArgs {
 
-    /*
-     
-     * TODO: use later for end gme event
-     
-     */
-
     private int totalScore;
 
     public int TotalScore

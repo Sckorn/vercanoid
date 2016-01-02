@@ -10,7 +10,7 @@ public class Options {
     private string sOptionsFilePath = @"Data/Options.xml";
     private bool bEnableUserBackgrounds = true;
     private bool bEnableUserAudio = true;
-    private float fAudioVolumeLevel = 1.0f;  //percentage 100 == 100%
+    private float fAudioVolumeLevel = 1.0f;
 
     public Options()
     {

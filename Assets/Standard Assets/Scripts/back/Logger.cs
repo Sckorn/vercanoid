@@ -81,11 +81,6 @@ public static class Logger {
 
     public static int GetExceptionsLineNumber(Exception e)
     {
-        //PBO version
-        /*StackTrace st = new StackTrace(e, true);
-        StackFrame frame = st.GetFrame(0);
-        return frame.GetFileLineNumber();*/
-        //PBO version
         int lineNumber = 0;
         const string lineSearch = ":line ";
         int index = e.StackTrace.LastIndexOf(lineSearch);

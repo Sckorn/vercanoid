@@ -26,11 +26,6 @@ public class InterfaceUpdater : MonoBehaviour
     public GameObject volumeLevelSliderReference = null;
     public GameObject endGameResultReference = null;
 
-    /*
-     
-     * TODO: add exception canvas and text
-     * 
-     */
     void Awake()
     {
         EventSystem.OnInterfaceUpdate += this.UpdateInterface;

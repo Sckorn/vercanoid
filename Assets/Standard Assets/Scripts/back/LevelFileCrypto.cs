@@ -40,7 +40,7 @@ public static class LevelFileCrypto {
         ICryptoTransform desencrypt = DES.CreateEncryptor();
         CryptoStream cryptoStream = new CryptoStream(fsEncrypted, desencrypt, CryptoStreamMode.Write);
 
-        byte[] byteArrayInput = new byte[fsInput.Length]; //- 1]; // remove minus one
+        byte[] byteArrayInput = new byte[fsInput.Length];
         fsInput.Read(byteArrayInput, 0, byteArrayInput.Length);
         cryptoStream.Write(byteArrayInput, 0, byteArrayInput.Length);
 

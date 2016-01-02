@@ -463,12 +463,7 @@ public class MainHelper : MonoBehaviour {
     }
 
     protected void UserBgLoader()
-    { 
-        /*
-         
-         * TODO program user backgrounds loader prior to the final release
-         
-         */
+    {
         string userDataFolder = "UserData/Backgrounds/";
 
         try
@@ -541,7 +536,7 @@ public class MainHelper : MonoBehaviour {
          * TODO Same as above but with user music
          
          */
-         
+        
         string userDataFolder = "UserData/Music/";
 
         try
@@ -576,8 +571,7 @@ public class MainHelper : MonoBehaviour {
                     Debug.LogWarning(f[0] + " " + f[1] + " " + f[2] + " " + f[3] + " " + f[4] + " " + f[5] + " " + f[6] + " " + f[7] + " " + f[8] + " " + f[9]);
                     AudioClip TmpClip = AudioClip.Create(clips.Count.ToString(), f.Length, 1, 44100, false, false);
                     TmpClip.SetData(f, 0);
-                    this.clips.Add(TmpClip);
-                    
+                    this.clips.Add(TmpClip);                    
                 }
             }
 
@@ -646,7 +640,6 @@ public class MainHelper : MonoBehaviour {
 
     public void ToMainMenu()
     {
-        //this.currentGame.GetCurrentField().ReInit();
         this.currentGame.RemoveDelegates();
         this.currentGame.GetHumanPlayer().RemoveDelegates();
         EventSystem.FlushEvents();

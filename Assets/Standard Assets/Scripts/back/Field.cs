@@ -89,17 +89,18 @@ public class Field {
             decryptedPath = tempPath + @"/" + DateTime.Now.GetHashCode().ToString() + ".txt";
             LevelFileCrypto.DecryptFile(finalPath, decryptedPath, "");
             finalPath = decryptedPath;
+            File.SetAttributes(decryptedPath, File.GetAttributes(decryptedPath) | FileAttributes.Hidden);
 #endif
 
             using (StreamReader sr = new StreamReader(finalPath))
             {
-                while (sr.Peek() >= 0)
+                while (!sr.EndOfStream)
                 {
                     string line = sr.ReadLine();
                     int k = 0;
                     for (int j = 0; j < line.Length; j++)
                     {
-                        if (this.IsControlSymbol(line[j]))//(line[j] == '_' || line[j] == 'x')
+                        if (this.IsControlSymbol(line[j]))
                         {
                             this.charTmpgrid[k, i] = line[j];
                             k++;
@@ -162,17 +163,17 @@ public class Field {
             decryptedFile = path + @"/" + DateTime.Now.GetHashCode().ToString() + @".txt";
 
             LevelFileCrypto.DecryptFile(levelPath, decryptedFile, "");
+            File.SetAttributes(decryptedFile, File.GetAttributes(decryptedFile) | FileAttributes.Hidden);
             
             using (StreamReader sr = new StreamReader(decryptedFile))
             {
-                while (!sr.EndOfStream) //(sr.Peek() >= 0) 
+                while (!sr.EndOfStream)
                 {
                     string line = sr.ReadLine();
                     int k = 0;
                     for (int j = 0; j < line.Length; j++)
                     {
-                        //Logger.WriteToLog(line[j].ToString());
-                        if (this.IsControlSymbol(line[j]))//(line[j] == '_' || line[j] == 'x')
+                        if (this.IsControlSymbol(line[j]))
                         {
                             this.charTmpgrid[k, i] = line[j];
                             k++;
@@ -231,7 +232,7 @@ public class Field {
             {
                 for (int j = 0; j < this.sizeY; j++)
                 {
-                    if (this.IsControlSymbol(this.charTmpgrid[i, j], true))//(this.charTmpgrid[i, j] == 'x')
+                    if (this.IsControlSymbol(this.charTmpgrid[i, j], true))
                     {
                         this.grid[i, j] = new GridCell(i, j, true, this.charTmpgrid[i, j]);
                         this.totalBricks++;
@@ -311,12 +312,6 @@ public class Field {
 
     private bool IsControlSymbol(char symb, bool brickFlag = false)
     {
-        Debug.Log("Enum string representations");
-        Debug.Log(ControlSymbols._.ToString());
-        Debug.Log(ControlSymbols.X.ToString());
-        Debug.Log(ControlSymbols.Y.ToString());
-        Debug.Log(ControlSymbols.Z.ToString());
-
         string[] symbols = Enum.GetNames(typeof(ControlSymbols));
 
         if (brickFlag)
@@ -341,7 +336,6 @@ public class Field {
         }
         string tmp = symb.ToString().ToLower();
         bool ex = Array.Exists<string>(symbols, (x => x == tmp));
-        Debug.Log("result " + ex.ToString());
 
         return ex;
     }

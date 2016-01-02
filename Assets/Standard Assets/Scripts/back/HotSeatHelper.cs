@@ -3,8 +3,6 @@ using System.Collections;
 
 public class HotSeatHelper : MonoBehaviour {
     private InterfaceUpdater InterfaceUpdaterRef = null;
-    private GameObject MainCameraRef = null;
-    private Game currentGame;
 	// Use this for initialization
 
     void OnEnable() {

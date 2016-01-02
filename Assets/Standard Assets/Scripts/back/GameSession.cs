@@ -96,6 +96,7 @@ public class GameSession {
             if (!Directory.Exists(targetPath)) Directory.CreateDirectory(targetPath);
             resultFile = targetPath + @"/" + DateTime.Now.GetHashCode().ToString() + @".xml";
             LevelFileCrypto.DecryptFile(xmlFilePath, resultFile, "");
+            File.SetAttributes(resultFile, File.GetAttributes(resultFile) | FileAttributes.Hidden);
         }
         catch (IOException e)
         { 
