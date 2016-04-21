@@ -132,8 +132,9 @@ public class MainMenuHelper : MonoBehaviour {
     }
 
     public void StartLan()
-    { 
-        
+    {
+        GameObject.Find("MultiplayerCanvas").GetComponent<Canvas>().enabled = false;
+        GameObject.Find("LANGameSearchCanvas").GetComponent<Canvas>().enabled = true;
     }
 
     public void MultiplayerMods()
